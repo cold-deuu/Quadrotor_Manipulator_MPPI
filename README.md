@@ -1,5 +1,33 @@
 ### MPPI Controller for Quadrotor Manipulator System ###
+---
 Simulation Base : https://github.com/RISC-NYUAD/Aerial-Manipulator-Gazebo.git
 
+## Dependencies ##
+---
+* Ubuntu 20-04, ROS-Noetic
+* Pinocchio (Kinematics Solver)
+* CVXOPT (pip install cvxopt)
+
 ## How To Run ##
-<img src="https://capsule-render.vercel.app/api?type=모양&color=색상코드&height=높이&section=header&text=텍스트&fontSize=텍스트크기" />
+---
+**Launch Simulator**
+```Terminal
+roslaunch aerial_manipulation aerial_manipulator
+```
+**Launch Controller**
+```
+roscd mav_mppi/scripts
+python3 kinova.py
+```
+## Change Log ##
+---
+|Date|Log|
+|--|--|
+|2025-06-27|Test IK Control|
+
+
+## To Do List ##
+[] Insert MPPI Controller 
+[] Data Collector Script 
+[] Code 정리
+ 
