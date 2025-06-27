@@ -27,7 +27,7 @@ python3 kinova.py
 
 
 ## To Do List ##
--[ ] Insert MPPI Controller 
--[ ] Data Collector Script 
--[ ] Code 정리
+[ ] Insert MPPI Controller 
+[ ] Data Collector Script 
+[ ] Code 정리
  
