@@ -7,6 +7,7 @@ Simulation Base : https://github.com/RISC-NYUAD/Aerial-Manipulator-Gazebo.git
 * Ubuntu 20-04, ROS-Noetic
 * Pinocchio (Kinematics Solver)
 * CVXOPT (pip install cvxopt)
+* Pytorch
 
 ## How To Run ##
 ---
