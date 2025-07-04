@@ -32,4 +32,5 @@ python3 kinova.py
 - [x] Insert MPPI Controller (각각)
 - [ ] Insert Whole-body MPPI Controller
 - [ ] Data Collector Script (Plot)
+- [ ] ROS Action Interface 구축
  
