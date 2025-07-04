@@ -24,10 +24,11 @@ python3 kinova.py
 |Date|Log|
 |--|--|
 |2025-06-27|Test IK Control|
-
+|2025-07-04|Drone MPPI Controller|
+|2025-07-04|Kinova MPPI Controller|
 
 ## To Do List ##
-- [ ] Insert MPPI Controller 
-- [ ] Data Collector Script 
-- [ ] Code 정리
+- [x] Insert MPPI Controller (각각)
+- [ ] Insert Whole-body MPPI Controller
+- [ ] Data Collector Script (Plot)
  
