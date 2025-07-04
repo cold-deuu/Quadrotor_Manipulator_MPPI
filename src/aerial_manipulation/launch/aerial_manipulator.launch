@@ -36,8 +36,8 @@
       <arg name="x" value="0.0"/>
 	  <arg name="y" value="0.0"/>
 	  <arg name="z" value="0.495"/>
-      <arg name="load_manipulator" value="1" />
-      <arg name="with_landing_gear" value="1"/>
+      <arg name="load_manipulator" value="0" />
+      <arg name="with_landing_gear" value="0"/>
       <arg name="desired_x" value="0.0"/>
       <arg name="desired_y" value="0.0"/>
 	  <arg name="desired_z" value="2.1"/>

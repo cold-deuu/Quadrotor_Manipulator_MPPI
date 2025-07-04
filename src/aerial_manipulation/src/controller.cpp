@@ -24,6 +24,8 @@
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/Twist.h>
 
+#include <cmath>
+
 
 using namespace std; 	using Eigen::Matrix3d;
 using Eigen::Matrix4f;	using Eigen::Vector3d;
@@ -70,6 +72,17 @@ private: event::ConnectionPtr updateConnection;
 
 
 
+// TEST 250701 //
+public : double acc_x, acc_y, acc_z, acc_psi;
+
+public : double Kpx, Kpy, Kpz;
+public : double Kdx, Kdy, Kdz;
+public : double Kpph, Kpth, Kpps;
+public : double Kdph, Kdth, Kdps;
+public : double Kix, Kiy, Kiz;
+
+
+
 
 
 public: void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
@@ -84,6 +97,31 @@ public: void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 		landing_gear_retracted = 0;
 		Land = false;
 		ready_to_land = false;
+		
+		// Gains
+		nh.param("gains/Kp/x", Kpx, 3.0);
+		nh.param("gains/Kp/y", Kpy, 3.0);
+		nh.param("gains/Kp/z", Kpz, 1.4);
+
+		nh.param("gains/Kd/x", Kdx, 0.7);
+		nh.param("gains/Kd/y", Kdy, 0.7);
+		nh.param("gains/Kd/z", Kdz, 3.0);
+
+		nh.param("gains/Kp_angle/roll",  Kpph, 10.0);
+		nh.param("gains/Kp_angle/pitch", Kpth, 10.0);
+		nh.param("gains/Kp_angle/yaw",   Kpps, 1.0);
+
+		nh.param("gains/Kd_angle/roll",  Kdph, 26.0);
+		nh.param("gains/Kd_angle/pitch", Kdth, 26.0);
+		nh.param("gains/Kd_angle/yaw",   Kdps, 2.0);
+
+		nh.param("gains/Ki/x", Kix, 0.2);
+		nh.param("gains/Ki/y", Kiy, 0.2);
+		nh.param("gains/Ki/z", Kiz, 0.3);
+
+
+
+
 
 		Eigen::VectorXd temp(7);
 		temp << 1.57,1.7,0,4.4,0,4.71,0 ;
@@ -148,7 +186,8 @@ public: void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
 public: void onUpdate()
 {
-    // ✅ 시간 측정 API 변경
+
+	// ✅ 시간 측정 API 변경
     physics::WorldPtr world = this->model->GetWorld();
     time = world->SimTime().Double();
     if (std::abs(time - 0.001) < 1e-6)
@@ -194,6 +233,7 @@ public: void onUpdate()
         foundpose.robot_q = angs;
         foundpose.robot_qdot = angd;
     }
+	else system_armed = 1;
 
     // ✅ gazebo::math 제거, ignition::math 사용
     ignition::math::Pose3d pose = quad->WorldPose();
@@ -204,7 +244,6 @@ public: void onUpdate()
 
     if (!system_armed)
     {
-		std::cout<< "Error : "<<(foundpose.robot_q - q_desired).norm()<<std::endl;
         if ((foundpose.robot_q - q_desired).norm() < 1e-1)
         {
             system_armed = 1;
@@ -221,18 +260,14 @@ public: void onUpdate()
     else
         quat1.normalize();
     foundpose.quatern = quat1;
-
     if (my_norm(quatern) < std::numeric_limits<double>::epsilon())
         quatern.Set(1, 0, 0, 0);
     else
         quatern.Normalize();
-
     ignition::math::Vector3d rpy = quatern.Euler();  // ✅ 변경
     foundpose.orientation << rpy.X(), rpy.Y(), rpy.Z();
-
     foundpose.velocity = Eigen::Vector3d(lin_vel.X(), lin_vel.Y(), lin_vel.Z());
     foundpose.angular_rate = Eigen::Vector3d(ang_vel.X(), ang_vel.Y(), ang_vel.Z());
-
     if (Land)
     {
         Eigen::VectorXd temp(7);
@@ -241,7 +276,6 @@ public: void onUpdate()
         if (ready_to_land)
             des_z -= 0.0002;
     }
-
     Eigen::VectorXd torques(7);
 	
     if (manipulator_bool)
@@ -267,7 +301,6 @@ public: void onUpdate()
             joint_i->SetForce(0, finger_torques(i + 2));
         }
     }
-
 	// Joint State Publishing
 	sensor_msgs::JointState state_msg;
 	state_msg.position.resize(14);
@@ -280,23 +313,32 @@ public: void onUpdate()
 	state_msg.position[4] = foundpose.quatern.y();
 	state_msg.position[5] = foundpose.quatern.z();
 	state_msg.position[6] = foundpose.quatern.w();
-	
+
 	state_msg.velocity[0] = foundpose.velocity[0];
+
 	state_msg.velocity[1] = foundpose.velocity[1];
+
 	state_msg.velocity[2] = foundpose.velocity[2];
+
 	state_msg.velocity[3] = foundpose.angular_rate[0];
 	state_msg.velocity[4] = foundpose.angular_rate[1];
 	state_msg.velocity[5] = foundpose.angular_rate[2];
-	
-	for(int i=0; i<7; i++)
-	{
-		state_msg.position[i+7] = foundpose.robot_q(i);
-		state_msg.velocity[i+6] = foundpose.robot_qdot(i);
-	}
-	state_pub.publish(state_msg);
 
+	if (manipulator_bool)
+	{
+		for(int i=0; i<7; i++)
+		{
+			state_msg.position[i+7] = foundpose.robot_q(i);
+			state_msg.velocity[i+6] = foundpose.robot_qdot(i);
+		}
+		
+	}
+
+	state_pub.publish(state_msg);
     if (system_armed)
+	{
         calc_n_publish(foundpose, torques(0));
+	}
 
     prev_time = time;
 }
@@ -376,15 +418,11 @@ public: double integral(double error,double prev_error)
 public: void calc_n_publish(DerivedPose foundpose, double z_moment)
 	{
 		
-		std::cout<< "Des X : "<<des_x<<", Des Y: "<<des_y<<", Des Z: "<<des_z<<", Des Yaw: "<<des_yaw<<std::endl;
-		
 		double desired[8]={des_x,0.0,des_y,0.0,des_z,0.0,des_yaw,0.0}; 		 
 		Eigen::VectorXd rotor_velocities(8);
 		computeQuadControl(foundpose, desired, z_moment, &rotor_velocities);	
-
 		mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
 		actuator_msg->angular_velocities.clear();
-
 		
 		for(int i=0;i<8;i++)
 		{
@@ -414,7 +452,6 @@ public: void computeQuadControl(DerivedPose foundpose, double desiredState[8], d
 		Eigen::Vector3d ang_vel = foundpose.angular_rate;
 		Eigen::Vector3d orient = foundpose.orientation;
 		Eigen::Quaterniond quatern = foundpose.quatern;
-		Eigen::VectorXd kinova_angles = foundpose.robot_q;
 
 		//  state variables //
 		double x,y,z,x_d,y_d,z_d,phi,theta,psi,phi_d,theta_d,psi_d;
@@ -441,25 +478,18 @@ public: void computeQuadControl(DerivedPose foundpose, double desiredState[8], d
 		xdes = desiredState[0];	ydes = desiredState[2];	zdes = desiredState[4]; psides = desiredState[6];	
 
 		xddes = desiredState[1];	yddes = desiredState[3];	zddes = desiredState[5];
-		phiddes = 0.3;			    thetaddes = 0.2;				psiddes = desiredState[7];	
+		phiddes = 0.0;			    thetaddes = 0.0;				psiddes = desiredState[7];	
 
+		psides = 0.0;
+
+
+		
 		//  constants //
 		double grav = 9.81;
 		double Ixx=1.57;	double Iyy=3.93;	double Izz=2.59;
 		double xlen = 0.53; double ylen = 0.57;
 
-		//  GAINS //
-		double Kpx=3;   double Kpy=3;   double Kpz=1.4;  
 
-		double Kdx=0.7;   double Kdy=0.7;   double Kdz=3; 
-
-		double Kpph=10;    double Kpth=10;    double Kpps=1; 
-
-		double Kdph=26;  double Kdth=26;  double Kdps=2;
-
-		double Kix=0.2;	double Kiy=0.2;	double Kiz=0.3;
-
-		
 		double e5 = zdes - z;
 		double p5 = integral(e5,prev_Perr(2));
 		double e6 = Kpz*e5 + zddes + Kiz*p5 - z_d;
@@ -468,9 +498,6 @@ public: void computeQuadControl(DerivedPose foundpose, double desiredState[8], d
 		mz_hat = mz_hat + mz_dot*(time-prev_time); 
 		double U1 =   (mz_hat/(cos(phi)*cos(theta)))*(grav + Kiz*e5 + Kpz*(-Kpz*e5 - Kiz*p5 + e6) + e5 + Kdz*e6 );    // found the desired thrust
 		
-
-		std::cout<<cos(phi)<<" "<<cos(theta)<<" "<<std::endl;
-
 		double e1 = xdes - x;
 		double p1 = integral(e1,prev_Perr(0));
 		double e2 = xddes + Kpx*e1 + Kix*p1 - x_d; 
@@ -478,7 +505,7 @@ public: void computeQuadControl(DerivedPose foundpose, double desiredState[8], d
 		double mx_dot = cx1*e2*(Kix*e1 - Kpx*Kpx*e1 - Kix*Kpx*p1 + Kpx*e2 + e1 + Kdx*e2);
 		mx_hat = mx_hat + mx_dot*(time-prev_time);
 		double ux = (mx_hat/U1)*(Kix*e1 - Kpx*Kpx*e1 - Kix*Kpx*p1 + Kpx*e2 + e1 + Kdx*e2);
-		
+
 		double e3 = ydes - y;
 		double p3 = integral(e3,prev_Perr(1));
 		double e4 = yddes + Kpy*e3 + Kiy*p3 - y_d;
@@ -486,7 +513,6 @@ public: void computeQuadControl(DerivedPose foundpose, double desiredState[8], d
 		double my_dot = cy1*e4*(Kiy*e3 - Kpy*Kpy*e3 - Kiy*Kpy*p3 + Kpy*e4 + e3 + Kdy*e4);
 		my_hat = my_hat + my_dot*(time-prev_time);
 		double uy = (my_hat/U1)*(Kiy*e3 - Kpy*Kpy*e3 - Kiy*Kpy*p3 + Kpy*e4 + e3 + Kdy*e4);
-
 
 		double alpha = cos(psides);	double beta = sin(psides);
 		double v1 = alpha*ux + beta*uy;
@@ -498,7 +524,15 @@ public: void computeQuadControl(DerivedPose foundpose, double desiredState[8], d
 		thetades = atan2(stheta, ctheta); 
 		
 		Eigen::Vector3d tau_g;
-		harrier_grav_feedback(orient, kinova_angles, &tau_g); 
+		if(manipulator_bool)
+		{
+			Eigen::VectorXd kinova_angles = foundpose.robot_q;
+			harrier_grav_feedback(orient, kinova_angles, &tau_g); 	
+		}
+		else
+		{
+			tau_g.setZero();
+		}
 		double z_mom = 0;
 		if(manipulator_bool){
 			z_mom = yaw_mom;
@@ -510,7 +544,7 @@ public: void computeQuadControl(DerivedPose foundpose, double desiredState[8], d
 		double gamma_x = 3;
 		double nx_dot = gamma_x*z2;
 		nx = nx + nx_dot*(time-prev_time);
-		double U2 = (Ixx/xlen)*( - Kpph*(z2 - Kpph*z1) - z1 - Kdph*z2 - nx - xlen*tau_g(0)/Ixx) + (1/xlen)*((Izz-Iyy)*theta_d*psi_d)  ;
+		double U2 = (Ixx/ylen)*( - Kpph*(z2 - Kpph*z1) - z1 - Kdph*z2 - nx - xlen*tau_g(0)/Ixx) + (1/ylen)*((Izz-Iyy)*theta_d*psi_d)  ;
 		
 		double z3 = theta - thetades;
 		double z4star = thetaddes - Kpth*z3;
@@ -518,15 +552,15 @@ public: void computeQuadControl(DerivedPose foundpose, double desiredState[8], d
 		double gamma_y = 3;
 		double ny_dot = gamma_y*z4;
 		ny = ny + ny_dot*(time-prev_time);
-		double U3 = (Iyy/ylen)*( - Kpth*(z4 - Kdth*z3) - z3 - Kdth*z4 - ny - ylen*tau_g(1)/Iyy) + (1/ylen)*((Ixx-Izz)*phi_d*psi_d) ;
+		double U3 = (Iyy/xlen)*( - Kpth*(z4 - Kdth*z3) - z3 - Kdth*z4 - ny - ylen*tau_g(1)/Iyy) + (1/xlen)*((Ixx-Izz)*phi_d*psi_d) ;
 		
 		double z5 = psi - psides;
 		double z6star = psiddes - Kpps*z5;
 		double z6 = psi_d - z6star;
 		double U4 = Izz*( - Kpps*(z6 - Kdps*z5) - z5 - Kdps*z6 - tau_g(2)/Izz + z_mom/Izz) + (Iyy-Ixx)*phi_d*theta_d ;
 
-		prev_Perr(0) = e1;	prev_Perr(1) = e3;	prev_Perr(2) = e5;
 
+	    ROS_INFO("Kpx: %f, Kpy: %f, Kpz: %f", Kpx, Kpy, Kpz);
 
 		// FINALIZATION AND EXITING //
 		Eigen::Vector3d angular_acc;	
@@ -534,18 +568,12 @@ public: void computeQuadControl(DerivedPose foundpose, double desiredState[8], d
 		double thrust = U1;	
 
 		Eigen::Vector4d angular_acceleration_thrust;
-		// if (!dronCB)
-		// {
+
 		angular_acceleration_thrust.block<3, 1>(0, 0) = angular_acc;
 		angular_acceleration_thrust(3) = thrust;
-		// }
-		// else{
-		// 	angular_acceleration_thrust(0) = tau_r;
-		// 	angular_acceleration_thrust(1) = tau_p;
-		// 	angular_acceleration_thrust(2) = tau_y;
-		// 	angular_acceleration_thrust(3) = f_thrust;	
-		// }
-		
+
+		std::cout<<"x : "<<x<<" y ; "<<y<<" z : "<<z<<std::endl;
+		prev_Perr(0) = e1;	prev_Perr(1) = e3;	prev_Perr(2) = e5;
 
 		Eigen::MatrixXd acc_to_sqvel_matrix(8,4);
 		calculateMatrixM(&acc_to_sqvel_matrix);
@@ -642,11 +670,17 @@ public: void drone_callback(const std_msgs::Float64MultiArray &msg)
 		des_x = msg.data[0];
 		des_y = msg.data[1];
 		des_z = msg.data[2];
-		des_yaw = msg.data[3];
+		// des_yaw = msg.data[3];
 		// f_thrust = msg.data[0];
 		// tau_r = msg.data[1];
 		// tau_p = msg.data[2];
 		// tau_y = msg.data[3];
+
+		// TEST 250701 //
+		// acc_x = msg.data[0];
+		// acc_y = msg.data[1];
+		// acc_z = msg.data[2];
+		// acc_psi = msg.data[3];
 	}
 
 
