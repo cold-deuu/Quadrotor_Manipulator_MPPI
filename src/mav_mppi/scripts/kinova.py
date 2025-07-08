@@ -20,7 +20,7 @@ from copy import deepcopy
 from cvxopt import matrix, solvers
 
 from robot.urdf_fk import URDFFK
-from mppi_solver.mppi import MPPI  # mppi.py 에 정의된 MPPI 클래스
+from mppi_solver.whole_mppi2 import whole_MPPI 
 import torch
 
 
@@ -40,16 +40,12 @@ def pretty_matrix_print(matrix):
         print(f"[ {formatted_row} ]")
 
 
-def quaternion_to_rpy(quaternion):
-    """
-    Converts a quaternion to roll, pitch, yaw (RPY) using ZYX rotation order.
-    Args:
-        quaternion (list or np.array): Quaternion [x, y, z, w].
-    Returns:
-        tuple: Roll, Pitch, Yaw in radians.
-    """
+def xyzquat_to_xyzrpy(xyzquat):
+    quaternion = xyzquat[3:].copy()
     rotation = R.from_quat(quaternion)
-    return rotation.as_euler('zyx', degrees=False)
+    rpy = rotation.as_euler('zyx', degrees=False)
+
+    return np.array([xyzquat[0], xyzquat[1], xyzquat[2], rpy[0], rpy[1], rpy[2]])
 
 
 class kinova(RobotWrapper):
@@ -57,11 +53,9 @@ class kinova(RobotWrapper):
         rospack = rospkg.RosPack()
         package_path = rospack.get_path('aerial_manipulation')
         pkg_dir = package_path + '/urdf'
-        urdf_path = pkg_dir + '/full_robot_floating2.urdf'  # Pinocchio 전용 URDF
+        urdf_path = pkg_dir + '/full_robot_floating2.urdf'  
 
-        # Build Pinocchio 모델
         self.robot = self.BuildFromURDF(urdf_path)
-        # 데이터 버퍼 생성
         self.data, _, _, = pin.createDatas(
             self.robot.model,
             self.robot.collision_model,
@@ -76,23 +70,18 @@ class controller:
         rospy.Subscriber("/harrierD7/robot_states", JointState, self.joint_state_callback)
 
         self.publisher        = rospy.Publisher("/harrierD7/robot_cmd", JointState, queue_size=10)
-        self.dronePosePub     = rospy.Publisher("/harrierD7/drone_pose", Float64MultiArray, queue_size=10)
+        self.dronePosePublisher     = rospy.Publisher("/harrierD7/drone_pose", Float64MultiArray, queue_size=10)
 
-        # Pinocchio 모델
         self.robot = kinova()
         self.q     = None
         self.v     = None
         self.baseSE3 = pin.SE3(1)
 
-        # MPPI 초기화
-        self.mppi = MPPI()
+        self.mppi = whole_MPPI()
 
-        # URDF‐FK (CPU) 초기화
         rospack = rospkg.RosPack()
         urdf_path = rospack.get_path("aerial_manipulation") + "/urdf/aerial_manipulator_gpu.urdf"
-        self.fk_urdf = URDFFK(urdf_path, root_link="base", end_link="j2s7s300_link_7")
 
-        # 기존 제어용 Traj
         self.jointTraj    = jointTraj(7)
         self.se3Traj      = SE3Traj()
 
@@ -103,26 +92,33 @@ class controller:
         self.qtmp             = np.zeros((4,))
 
 
+
+
     def joint_state_callback(self, msg):
-        # 전체 상태
         self.q = np.array(msg.position) 
         self.v = np.array(msg.velocity) 
 
-        # 드론 base pose
-        base_xyzquat = np.array(msg.position[:7]) # 드론 위치
-        self.baseSE3 = pin.XYZQUATToSE3(base_xyzquat) # 피노키오 객체로 변환
-        self.v[:3]   = self.baseSE3.rotation @ self.v[:3] # 드론 선속도 -> local to world
+        q_drone_euler = xyzquat_to_xyzrpy(self.q[:7])
+        self.q_euler = np.append(q_drone_euler, self.q[7:])
 
-        self.mppi.update_joint(self.q, self.v)
+        base_xyzquat = self.q[:7].copy() 
+        self.baseSE3 = pin.XYZQUATToSE3(base_xyzquat) 
+        self.v[:3] = self.baseSE3.rotation @ self.v[:3] 
+
+        pin.computeAllTerms(self.robot.model, self.robot.data, self.q, self.v)
+        # pin.forwardKinematics(self.robot.model, self.robot.data, self.q)
+        # pin.updateFramePlacements(self.robot.model, self.robot.data)
+
+
+        self.mppi.update_state(self.q_euler, self.v)
 
 
     def main(self):
         while not rospy.is_shutdown():
             self.rate.sleep()
-            if self.q is None or self.v is None: # 센서 메시지 들어오지 않으면 대기
+            if self.q is None or self.v is None: 
                 continue
 
-            # Pinocchio dynamics 업데이트
             pin.computeAllTerms(self.robot.model, self.robot.data, self.q, self.v)
             oMi = self.robot.data.oMi[self.robot.index("j2s7s300_joint_7")]
 
@@ -131,40 +127,47 @@ class controller:
             g = self.robot.data.nle
 
             oMi = self.robot.data.oMi[self.robot.index("j2s7s300_joint_7")]
-            if not self.jointControlFlag: # 조인트 제어가 완료되지 않은 동안
-                qtarget = np.array([1.57, 1.7, 0, 4.4, 0, 4.71, 0.0]) # 조인트 target : initial pose
+            if not self.jointControlFlag: 
+                qtarget = np.array([1.57, 1.7, 0, 4.4, 0, 4.71, 0.0]) 
 
-                if not self.control_init: # 처음에는 control_init가 False 이므로 trajectories 초기화
+                if not self.control_init: 
                     stime = time()
                     duration = 1.5
                     qinit = self.q[7:].copy()
-                    # print("qinit", qinit)
+
                     self.jointTraj.setDuration(duration)
                     self.jointTraj.setStartTime(stime)
                     self.jointTraj.setInitSample(qinit)
                     self.jointTraj.setTargetSample(qtarget)
                     self.control_init = True
-                else: # control_init가 이제 True 이니까 traj 따라서 매니퓰레이터 제어
+                else:
                     ctime = time()
                     self.jointTraj.setCurrentTime(ctime)
                     qdes = self.jointTraj.computeNext()
-                    qerr = qdes - self.q[7:]
+                    qerr = qdes - self.q[7:].copy()
                     ades = 1000 * qerr - 100 * self.v[6:]
                     torque = self.robot.data.M[6:, 6:] @ ades + g[6:]
-                    if np.linalg.norm(qtarget - self.q[7:]) < 0.01: # 조인트 오차가 충분히 작으면
+                    if np.linalg.norm(qtarget - self.q[7:]) < 0.01:
                             self.iter += 1
-                            if self.iter > 50: # 그게 50 스텝 유지되면
+                            if self.iter > 50: 
                                 self.jointControlFlag = True # True
                                 self.control_init = False
                                 print("Joint Control Finished")
+
+                    rospy.logwarn(f"oMi Current : {oMi}")
+   
+
+                msg_arm = JointState()
+                msg_arm.effort = [float(t) for t in torque[:7]]
+                self.publisher.publish(msg_arm)
  
             else:
-                if not self.control_init: # SE3 제어 시작 전 traj 초기화
+                if not self.control_init: 
                     stime = time()
                     duration = 12.0
                     xyzquat = np.array([1.0, 1.0, 1.1, 0.0, 0.0, 0.0, 1.0])
 
-                    targetSE3 = pin.SE3(1) # 목표 pose 설정
+                    targetSE3 = pin.SE3(1) 
                     targetSE3.translation = xyzquat[:3].copy() + oMi.translation.copy()
                     targetSE3.rotation = oMi.rotation
                     print("targetSE3:", targetSE3)
@@ -175,20 +178,28 @@ class controller:
                     self.se3Traj.setInitSample(oMi_init)
                     self.se3Traj.setTargetSample(targetSE3)
                     self.qtmp[:3] = self.q[:3].copy()
-                    self.qtmp[3] = quaternion_to_rpy(self.q[3:7])[2].copy()
+                    self.qtmp[3] = xyzquat_to_xyzrpy(self.q[:7])[2].copy()
                     self.control_init = True
+
+                    msg_arm = JointState()
+                    msg_arm.effort = [float(t) for t in torque[:7]]
+                    self.publisher.publish(msg_arm)
+
+
                 else:
-                    # MPPI로 다음 target q_des 생성
-                    qdes_, vdes = self.mppi.compute_control_input()     
-                    # q_des에 해당하는 제어 토크 입력 계산                   
-                    torque = self.robot.data.M[6:,6:] @ (400 * (qdes_ - self.q[7:]) + 40 * ( - self.v[6:])) + g[6:]
-
+                    
+                    q_des, v_des = self.mppi.compute_control_input()     
+                    torque = self.robot.data.M[6:,6:] @ (400 * (q_des[3:] - self.q[7:]) + 40 * ( - self.v[6:])) + g[6:]
+                    
+                    print(f'oMi : {oMi}')
                 
+                    msg_arm = JointState()
+                    msg_arm.effort = [float(t) for t in torque[:7]]
+                    self.publisher.publish(msg_arm)
 
-            # 계산된 제어 토크 입력 발행
-            msg = JointState()
-            msg.effort = [float(t) for t in torque[:7]]
-            self.publisher.publish(msg)
+                    msg_drone = Float64MultiArray()
+                    msg_drone.data = q_des[:3].tolist()
+                    self.dronePosePublisher.publish(msg_drone)
 
 
 if __name__ == "__main__":

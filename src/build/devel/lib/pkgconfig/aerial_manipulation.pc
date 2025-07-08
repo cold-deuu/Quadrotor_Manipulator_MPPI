@@ -1,0 +1,8 @@
+prefix=/home/chan/aerial_ws/src/build/devel
+
+Name: aerial_manipulation
+Description: Description of aerial_manipulation
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: roscpp gazebo_ros

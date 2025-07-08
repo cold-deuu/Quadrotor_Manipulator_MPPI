@@ -105,16 +105,6 @@
     <origin rpy="0 3.141592653589793 0" xyz="0 0 0.15675"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
-  <transmission name="j2s7s300_joint_1_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="j2s7s300_joint_1">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="j2s7s300_joint_1_actuator">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>160</mechanicalReduction>
-    </actuator>
-  </transmission>
   <link name="j2s7s300_link_2">
     <visual>
       <geometry>
@@ -148,16 +138,7 @@
     <origin rpy="-1.5707963267948966 0 3.141592653589793" xyz="0 0.0016 -0.11875"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
-  <transmission name="j2s7s300_joint_2_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="j2s7s300_joint_2">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="j2s7s300_joint_2_actuator">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>160</mechanicalReduction>
-    </actuator>
-  </transmission>
+
   <link name="j2s7s300_link_3">
     <visual>
       <geometry>
@@ -191,16 +172,7 @@
     <origin rpy="-1.5707963267948966 0 0" xyz="0 -0.205 0"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
-  <transmission name="j2s7s300_joint_3_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="j2s7s300_joint_3">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="j2s7s300_joint_3_actuator">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>160</mechanicalReduction>
-    </actuator>
-  </transmission>
+
   <link name="j2s7s300_link_4">
     <visual>
       <geometry>
@@ -234,16 +206,7 @@
     <origin rpy="1.5707963267948966 0 3.141592653589793" xyz="0 0 -0.205"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
-  <transmission name="j2s7s300_joint_4_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="j2s7s300_joint_4">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="j2s7s300_joint_4_actuator">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>160</mechanicalReduction>
-    </actuator>
-  </transmission>
+
   <link name="j2s7s300_link_5">
     <visual>
       <geometry>
@@ -277,16 +240,6 @@
     <origin rpy="-1.5707963267948966 0 3.141592653589793" xyz="0 0.2073 -0.0114"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
-  <transmission name="j2s7s300_joint_5_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="j2s7s300_joint_5">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="j2s7s300_joint_5_actuator">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>160</mechanicalReduction>
-    </actuator>
-  </transmission>
   <link name="j2s7s300_link_6">
     <visual>
       <geometry>
@@ -320,16 +273,6 @@
     <origin rpy="1.5707963267948966 0 3.141592653589793" xyz="0 0 -0.10375"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
-  <transmission name="j2s7s300_joint_6_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="j2s7s300_joint_6">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="j2s7s300_joint_6_actuator">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>160</mechanicalReduction>
-    </actuator>
-  </transmission>
   <link name="j2s7s300_link_7">
     <visual>
       <geometry>
@@ -363,16 +306,6 @@
     <origin rpy="-1.5707963267948966 0 3.141592653589793" xyz="0 0.10375 0"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
-  <transmission name="j2s7s300_joint_7_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="j2s7s300_joint_7">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="j2s7s300_joint_7_actuator">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>160</mechanicalReduction>
-    </actuator>
-  </transmission>
   <link name="j2s7s300_end_effector"/>
   <joint name="j2s7s300_joint_end_effector" type="fixed">
     <parent link="j2s7s300_link_7"/>
@@ -406,16 +339,6 @@
     <origin rpy="3.141592653589793 0 0" xyz="0 0 -0.1145"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
-  <transmission name="j2s7s300_joint_obj_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="j2s7s300_joint_obj">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="j2s7s300_joint_obj_actuator">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>160</mechanicalReduction>
-    </actuator>
-  </transmission>
   <link name="j2s7s300_link_finger_1">
     <visual>
       <geometry>
@@ -443,16 +366,6 @@
     <origin rpy="-1.570796327 .649262481663582 1.5361148639407" xyz="0.00279 0.03126 -0.11467"/>
     <limit effort="2" lower="0" upper="1.51" velocity="1"/>
   </joint>
-  <transmission name="j2s7s300_joint_finger_1_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="j2s7s300_joint_finger_1">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="j2s7s300_joint_finger_1_actuator">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
   <link name="j2s7s300_link_finger_tip_1">
     <visual>
       <geometry>
@@ -480,16 +393,7 @@
     <origin rpy="0 0 0" xyz="0.044 -0.003 0"/>
     <limit effort="2" lower="0" upper="2" velocity="1"/>
   </joint>
-  <transmission name="j2s7s300_joint_finger_tip_1_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="j2s7s300_joint_finger_tip_1">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="j2s7s300_joint_finger_tip_1_actuator">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
+
   <link name="j2s7s300_link_finger_2">
     <visual>
       <geometry>
@@ -517,16 +421,7 @@
     <origin rpy="-1.570796327 .649262481663582 -1.38614049188413" xyz="0.02226 -0.02707 -0.11482"/>
     <limit effort="2" lower="0" upper="1.51" velocity="1"/>
   </joint>
-  <transmission name="j2s7s300_joint_finger_2_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="j2s7s300_joint_finger_2">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="j2s7s300_joint_finger_2_actuator">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
+
   <link name="j2s7s300_link_finger_tip_2">
     <visual>
       <geometry>
@@ -554,16 +449,6 @@
     <origin rpy="0 0 0" xyz="0.044 -0.003 0"/>
     <limit effort="2" lower="0" upper="2" velocity="1"/>
   </joint>
-  <transmission name="j2s7s300_joint_finger_tip_2_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="j2s7s300_joint_finger_tip_2">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="j2s7s300_joint_finger_tip_2_actuator">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
   <link name="j2s7s300_link_finger_3">
     <visual>
       <geometry>
@@ -591,16 +476,6 @@
     <origin rpy="-1.570796327 .649262481663582 -1.75545216211587" xyz="-0.02226 -0.02707 -0.11482"/>
     <limit effort="2" lower="0" upper="1.51" velocity="1"/>
   </joint>
-  <transmission name="j2s7s300_joint_finger_3_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="j2s7s300_joint_finger_3">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="j2s7s300_joint_finger_3_actuator">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
   <link name="j2s7s300_link_finger_tip_3">
     <visual>
       <geometry>
@@ -628,15 +503,5 @@
     <origin rpy="0 0 0" xyz="0.044 -0.003 0"/>
     <limit effort="2" lower="0" upper="2" velocity="1"/>
   </joint>
-  <transmission name="j2s7s300_joint_finger_tip_3_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="j2s7s300_joint_finger_tip_3">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="j2s7s300_joint_finger_tip_3_actuator">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
 </robot>
 

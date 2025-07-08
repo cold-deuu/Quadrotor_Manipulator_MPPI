@@ -5,6 +5,7 @@ import os
 from filter.svg_filter import SavGolFilter
 
 class MPPI():
+    """drone MPPI"""
     def __init__(self):
         # torch env
         os.environ['CUDA_DEVICE_ORDER']="PCI_BUS_ID"
@@ -53,34 +54,6 @@ class MPPI():
         dq = v_prev * dt + 0.5 * samples * dt**2
         q = torch.cumsum(dq, dim=1) + q0
         return q
-    
-    # def predict_trajectory(self, u):
-    #     f = torch.zeros((self.n_samples, self.n_timestep, 3),device=self.device)
-    #     f[:,:,2] = u[:,:,0].clone()
-    #     tau = u[:,:,1:].clone()
-    #     trajectory = torch.zeros((self.n_samples, self.n_timestep, 6), device = self.device)
-
-    #     angvel = torch.zeros((self.n_samples, self.n_timestep, 3), device = self.device)
-    #     transvel = torch.zeros((self.n_samples, self.n_timestep, 3), device = self.device)
-    #     angvel[:,0,:] = self.v_prev[3:].clone() + self.dt * torch.einsum('ij, sj -> si', self.I_inv, tau[:,0,:].clone())
-    #     J = self.compute_rotational_jacobian(self.x_prev[3:])
-    #     rot_mat = self.get_rotation_matrix(self.x_prev[3:])
-    #     transvel[:,0,:] = self.v_prev[:3].clone() + self.dt * (self.g + 1/self.m * (torch.einsum('ij, sj -> si',rot_mat,f[:,0,:]) - self.kd * self.v_prev[:3].clone()))
-    #     trajectory[:,0,3:] = self.x_prev[3:].clone().unsqueeze(0) + self.dt * J @ self.v_prev[3:]
-    #     trajectory[:,0,:3] = self.x_prev[:3].clone() + self.dt * self.v_prev[:3]
-    #     for i in range(1, self.n_timestep):
-    #         angvel[:,i,:] = angvel[:,i-1,:] + self.dt * torch.einsum('ij, sj -> si',self.I_inv, tau[:,i,:].clone()) 
-    #         J = self.compute_rotational_jacobian_gpu(trajectory[:,i-1,3:])
-    #         J_inv = torch.linalg.inv(J)
-    #         rot_mat = self.get_rotation_matrix_gpu(trajectory[:,i-1, 3:])
-    #         trajectory[:,i,3:] = trajectory[:,i-1,3:] + self.dt * torch.einsum("bijk,bk->bij",J_inv,angvel[:,i,:]).squeeze(1)
-    #         trajectory[:, i, 3:] = torch.atan2(torch.sin(trajectory[:, i, 3:]), torch.cos(trajectory[:, i, 3:]))
-    #         transvel[:,i,:] = (transvel[:,i-1,:].unsqueeze(1) + self.dt * (self.g + 1/self.m *(torch.einsum("bijk,bj->bik",rot_mat, f[:,i,:])- self.kd * transvel[:,i-1,:].unsqueeze(1)))).squeeze(1)
-    #         trajectory[:,i,:3] = trajectory[:,i-1,:3].clone() + self.dt * transvel[:,i,:]
-        
-
-        
-    #     return trajectory
 
 
     
@@ -149,10 +122,7 @@ class MPPI():
         S = torch.zeros((self.n_samples), device = self.device)
         S += self.compute_stage_cost(trajectory, target)
         S += self.compute_terminal_cost(trajectory, target)
-        # Sigma_inv = torch.linalg.inv(self.sigma_matrix)
-        # quad_term = torch.matmul(u.unsqueeze(-2), Sigma_inv @ v.unsqueeze(-1)).squeeze(-1).squeeze(-1)  # (batch_size, time_step)
 
-        # S += self.param_gamma * quad_term.sum(dim=1)  # (batch_size,)
         w = self.compute_weights(S)
         w_expanded = w.view(-1, 1, 1)        
         w_epsilon = torch.sum(w_expanded * noise, dim=0)
@@ -160,7 +130,6 @@ class MPPI():
         w_epsilon = self.filter.savgol_filter_torch(w_epsilon,window_size=5,polyorder=2)
 
         u += w_epsilon
-        # u = self.apply_constraint(u)
         
 
         self.u_prev = u.clone()
@@ -169,8 +138,6 @@ class MPPI():
         v = self.v_prev.clone() + self.dt * self.u.clone()
         x = self.x_prev.clone() + self.v_prev * self.dt + 0.5 * self.u.clone() * self.dt**2
 
-        # best_idx = torch.argmin(S)
-        # # print(trajectory[best_idx])
 
         
         return x, v

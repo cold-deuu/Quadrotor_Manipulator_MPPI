@@ -1,0 +1,8 @@
+prefix=/home/chan/aerial_ws/src/build/devel
+
+Name: mav_mppi
+Description: Description of mav_mppi
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

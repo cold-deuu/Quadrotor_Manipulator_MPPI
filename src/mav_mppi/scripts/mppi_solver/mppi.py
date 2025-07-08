@@ -24,8 +24,9 @@ from utils.rotation_conversions import euler_angles_to_matrix, matrix_to_euler_a
 # Filter : MPPI
 from filter.svg_filter import SavGolFilter
 
-class MPPI:
-    def __init__(self):
+class whole_MPPI:
+    """Manipulator MPPI"""
+    def __init__(self, target_pose=None):
         # Logger 및 device 설정
         os.environ['CUDA_DEVICE_ORDER'] = "PCI_BUS_ID"
         os.environ['CUDA_VISIBLE_DEVICES'] = '0'
@@ -35,8 +36,8 @@ class MPPI:
 
         # MPPI 하이퍼파라미터
         self.n_action = 7
-        self.n_manipulator_dof = 7
-        self.n_mobile_dof = 0
+        # self.n_manipulator_dof = 7
+        # self.n_mobile_dof = 0
         self.n_samples = 100
         self.n_horizon = 32
         self.dt = 0.01
@@ -67,9 +68,12 @@ class MPPI:
 
 
         # Target states
-        self.target_pose = Pose()
-        self.target_pose.pose = torch.tensor([0.1029, 0.4055, 1.6498])
-        self.target_pose.orientation = torch.tensor([ -0.5, -0.5, 0.5, -0.5 ])
+        if target_pose is None:
+            self.target_pose = Pose()
+            self.target_pose.pose = torch.tensor([0.1029, 0.4055, 1.6498])
+            self.target_pose.orientation = torch.tensor([-0.5, -0.5, 0.5, -0.5])
+        else:
+            self.target_pose = target_pose
         # self.target_pose.orientation = torch.tensor([0, -0.4871745, 0, -0.8733046])
         
         self._lambda = 0.1
@@ -137,7 +141,7 @@ class MPPI:
         none_joint_trajs = torch.zeros((self.n_samples, self.n_horizon, self.n_action), device=self.device)
         self.cost_manager.update_pose_cost(q_samples, v, trajectory, none_joint_trajs, self.target_pose)
         self.cost_manager.update_covar_cost(u, v, self.sample_gen.sigma_matrix)
-        S = self.cost_manager.compute_all_cost() # 최종 cost : 샘플 별로 cost 점수 하나 씩
+        S, _ = self.cost_manager.compute_all_cost() # 최종 cost : 샘플 별로 cost 점수 하나 씩
 
         # weight 계산 + 부드럽게 필터링
         w = self.compute_weights(S, self._lambda) # (n_samples,)

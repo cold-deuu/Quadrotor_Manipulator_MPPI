@@ -36,7 +36,7 @@ class CostManager:
         self.covar_weight = 0.1
 
         # Action Cost Weights
-        self.action_weight = 0.01
+        self.action_weight = 0.0
 
         # Joint Space Cost Weights
         self.centering_cost = 1.0
@@ -76,15 +76,23 @@ class CostManager:
 
 
     def compute_all_cost(self):
-        S = torch.zeros((self.n_sample), device = self.device)
+        S = torch.zeros((self.n_sample), device=self.device)
+        cost_stage = self.pose_cost.compute_stage_cost(self.eef_trajectories, self.target)
+        cost_terminal = self.pose_cost.compute_terminal_cost(self.eef_trajectories, self.target)
+        # cost_joint_limit = self.joint_cost.compute_joint_limit_cost(self.qSamples[..., 3:])
 
-        S += self.pose_cost.compute_stage_cost(self.eef_trajectories, self.target)
-        S += self.pose_cost.compute_terminal_cost(self.eef_trajectories, self.target)
-        # S += self.covar_cost.compute_covar_cost(self.sigma_matrix, self.u, self.v)
-        # S += self.joint_cost.compute_centering_cost(self.qSamples)
-        # S += self.joint_cost.compute_jointTraj_cost(self.qSamples, self.joint_trajectories)
-        # S += self.action_cost.compute_action_cost(self.uSamples)
-        # S += self.joint_cost.compute_joint_limit_cost(self.qSamples)
+        S += cost_stage
+        S += cost_terminal
+        # S += cost_joint_limit
 
-        return S
+        cost_log_dict = {
+            "stage_cost": float(cost_stage.mean().cpu()),
+            "terminal_cost": float(cost_terminal.mean().cpu()),
+            # "joint_limit_cost": float(cost_joint_limit.mean().cpu())
+        }
+
+        # print(f"cost_log_dict : \n{cost_log_dict}")
+
+        # 전체, 그리고 각 cost 항목도 함께 반환
+        return S, cost_log_dict
     

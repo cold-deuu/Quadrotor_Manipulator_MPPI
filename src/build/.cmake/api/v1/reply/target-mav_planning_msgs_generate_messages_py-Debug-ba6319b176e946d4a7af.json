@@ -1,0 +1,358 @@
+{
+	"backtrace" : 4,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_custom_target",
+			"include",
+			"generate_messages",
+			"add_dependencies"
+		],
+		"files" : 
+		[
+			"build/mav_comm/mav_planning_msgs/cmake/mav_planning_msgs-genmsg.cmake",
+			"/opt/ros/noetic/share/genmsg/cmake/genmsg-extras.cmake",
+			"mav_comm/mav_planning_msgs/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 2
+			},
+			{
+				"command" : 2,
+				"file" : 2,
+				"line" : 38,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 307,
+				"parent" : 1
+			},
+			{
+				"file" : 0,
+				"parent" : 2
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 651,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 798,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 792,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 801,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 804,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 670,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 668,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 664,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 658,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 660,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 795,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 666,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 662,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 680,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 672,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 674,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 678,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 676,
+				"parent" : 3
+			}
+		]
+	},
+	"dependencies" : 
+	[
+		{
+			"backtrace" : 5,
+			"id" : "std_msgs_generate_messages_py::@0eb71bc6d5b12e2a1c2a"
+		},
+		{
+			"backtrace" : 6,
+			"id" : "geometry_msgs_generate_messages_py::@a23ec65a88488c4cddae"
+		},
+		{
+			"backtrace" : 7,
+			"id" : "mav_msgs_generate_messages_py::@48535c8cc480d6857d86"
+		},
+		{
+			"backtrace" : 8,
+			"id" : "trajectory_msgs_generate_messages_py::@48535c8cc480d6857d86"
+		},
+		{
+			"backtrace" : 9,
+			"id" : "_mav_planning_msgs_generate_messages_check_deps_PolynomialTrajectory::@e89fc83d4fc47971b075"
+		},
+		{
+			"backtrace" : 10,
+			"id" : "_mav_planning_msgs_generate_messages_check_deps_PolynomialSegment::@e89fc83d4fc47971b075"
+		},
+		{
+			"backtrace" : 11,
+			"id" : "_mav_planning_msgs_generate_messages_check_deps_PolygonWithHoles::@e89fc83d4fc47971b075"
+		},
+		{
+			"backtrace" : 12,
+			"id" : "_mav_planning_msgs_generate_messages_check_deps_Point2D::@e89fc83d4fc47971b075"
+		},
+		{
+			"backtrace" : 13,
+			"id" : "_mav_planning_msgs_generate_messages_check_deps_PointCloudWithPose::@e89fc83d4fc47971b075"
+		},
+		{
+			"backtrace" : 14,
+			"id" : "sensor_msgs_generate_messages_py::@e89fc83d4fc47971b075"
+		},
+		{
+			"backtrace" : 15,
+			"id" : "_mav_planning_msgs_generate_messages_check_deps_PolygonWithHolesStamped::@e89fc83d4fc47971b075"
+		},
+		{
+			"backtrace" : 16,
+			"id" : "_mav_planning_msgs_generate_messages_check_deps_Polygon2D::@e89fc83d4fc47971b075"
+		},
+		{
+			"backtrace" : 17,
+			"id" : "_mav_planning_msgs_generate_messages_check_deps_ChangeNameService::@e89fc83d4fc47971b075"
+		},
+		{
+			"backtrace" : 18,
+			"id" : "_mav_planning_msgs_generate_messages_check_deps_PolynomialSegment4D::@e89fc83d4fc47971b075"
+		},
+		{
+			"backtrace" : 19,
+			"id" : "_mav_planning_msgs_generate_messages_check_deps_PolynomialTrajectory4D::@e89fc83d4fc47971b075"
+		},
+		{
+			"backtrace" : 20,
+			"id" : "_mav_planning_msgs_generate_messages_check_deps_PolygonService::@e89fc83d4fc47971b075"
+		},
+		{
+			"backtrace" : 21,
+			"id" : "_mav_planning_msgs_generate_messages_check_deps_PlannerService::@e89fc83d4fc47971b075"
+		}
+	],
+	"id" : "mav_planning_msgs_generate_messages_py::@e89fc83d4fc47971b075",
+	"name" : "mav_planning_msgs_generate_messages_py",
+	"paths" : 
+	{
+		"build" : "mav_comm/mav_planning_msgs",
+		"source" : "mav_comm/mav_planning_msgs"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		},
+		{
+			"name" : "CMake Rules",
+			"sourceIndexes" : 
+			[
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 4,
+			"isGenerated" : true,
+			"path" : "build/mav_comm/mav_planning_msgs/CMakeFiles/mav_planning_msgs_generate_messages_py",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/mav_comm/mav_planning_msgs/CMakeFiles/mav_planning_msgs_generate_messages_py.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/devel/lib/python3/dist-packages/mav_planning_msgs/msg/_Point2D.py.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/devel/lib/python3/dist-packages/mav_planning_msgs/msg/_PointCloudWithPose.py.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/devel/lib/python3/dist-packages/mav_planning_msgs/msg/_Polygon2D.py.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/devel/lib/python3/dist-packages/mav_planning_msgs/msg/_PolygonWithHoles.py.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/devel/lib/python3/dist-packages/mav_planning_msgs/msg/_PolygonWithHolesStamped.py.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/devel/lib/python3/dist-packages/mav_planning_msgs/msg/_PolynomialSegment.py.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/devel/lib/python3/dist-packages/mav_planning_msgs/msg/_PolynomialTrajectory.py.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/devel/lib/python3/dist-packages/mav_planning_msgs/msg/_PolynomialSegment4D.py.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/devel/lib/python3/dist-packages/mav_planning_msgs/msg/_PolynomialTrajectory4D.py.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/devel/lib/python3/dist-packages/mav_planning_msgs/srv/_PlannerService.py.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/devel/lib/python3/dist-packages/mav_planning_msgs/srv/_PolygonService.py.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/devel/lib/python3/dist-packages/mav_planning_msgs/srv/_ChangeNameService.py.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/devel/lib/python3/dist-packages/mav_planning_msgs/msg/__init__.py.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/devel/lib/python3/dist-packages/mav_planning_msgs/srv/__init__.py.rule",
+			"sourceGroupIndex" : 1
+		}
+	],
+	"type" : "UTILITY"
+}

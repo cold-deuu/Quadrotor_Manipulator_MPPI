@@ -1,0 +1,8 @@
+prefix=/home/chan/aerial_ws/src/build/devel
+
+Name: rotors_hil_interface
+Description: Description of rotors_hil_interface
+Version: 2.2.3
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

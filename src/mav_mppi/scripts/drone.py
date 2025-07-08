@@ -17,6 +17,8 @@ from scipy.spatial.transform import Rotation as R
 from copy import deepcopy
 
 from mppi_solver.drone_mppi import MPPI
+# from mav_mppi.scripts.mppi_solver.whole_mppi import whole_MPPI   
+
 
 
 def pretty_matrix_print(matrix):
@@ -96,6 +98,8 @@ class controller:
 
         self.iter = 0
         self.qtmp = np.zeros((4))
+
+
     def joint_state_callback(self, msg):
         self.q = np.array(msg.position[:7])
         self.v = np.array(msg.velocity[:6])
@@ -164,82 +168,11 @@ class controller:
                 self.mppi.set_state(trans, vel)
                 xdes, _ = self.mppi.compute_control_input()
                 print(f"Xdes : {xdes}")
-
-                # print(u)
-                # tau = u[1:].to('cpu').numpy()
-                # f = u[0].to("cpu").numpy()
-                # f_ = np.array([0,0,f])
-
-                # I_inv = np.zeros((3,3))
-                # I_inv[0,0] = 1/1.57
-                # I_inv[1,1] = 1/3.93
-                # I_inv[2,2] = 1/2.59
-
-                # J = self.compute_rotational_jacobian()
-                # J_inv = np.linalg.inv(J)
-                # g = np.array([0,0,-9.81])
-                # omega_next = self.v[3:].copy() + I_inv @ tau * 0.01
-                # theta_next = self.q_euler[3:].copy() + 0.01 * J_inv @ omega_next.copy()
-                # rot_next = self.get_rotation_matrix(theta_next)
-                # v_next = self.v[:3].copy() +0.01 * (g + rot_next @ f_)/14.7
-                # x_next = self.q[:3].copy() + 0.01 * v_next
-
-                
-
-                # print(u)
-
-
-                # frame_name=  "drone"
-                # frame_id = self.robot.model.getFrameId(frame_name)
-                # oMf = self.robot.data.oMf[frame_id]
-                # J_local = pin.getFrameJacobian(self.robot.model, self.robot.data, frame_id, pin.ReferenceFrame.LOCAL)
-                # # J_drone = np.zeros((6,4))
-                # # J_drone[:,:3] = J_local[:,:3].copy()
-                # # J_drone[:, -1] = J_local[:,-1].copy()
-                # if not self.control_init:
-
-                        
-                #     targetSE3 = pin.XYZQUATToSE3(np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]))
-                #     targetSE3 = oMf * targetSE3
-                #     oMf_init = deepcopy(oMf)
-                #     self.se3Traj.setInitSample(oMf_init)
-                #     self.se3Traj.setTargetSample(targetSE3)
-                #     self.se3Traj.setStartTime(time())
-                #     self.se3Traj.setDuration(12.0)
-                #     self.control_init = True
-                # else:
-                #     ctime = time()
-                #     self.se3Traj.setCurrentTime(ctime)
-                #     target = self.se3Traj.computeNext()
-
-                #     target_6d = pin.log(target).vector
-                #     diff_6d = pin.log(oMf.inverse() * target).vector
-                #     vdrone = np.zeros((4))
-                #     vdrone[:3] = self.v[:3].copy()
-                #     vdrone[3] = self.v[-1].copy()
-                #     ades = 5 * diff_6d - 20 * J_local @ self.v
-                #     qddot_des = np.linalg.pinv(J_local) @ ades
-
-                #     print(f"target : {target_6d}")
-
-                #     mass = self.robot.data.M
-                #     # g = self.robot.data.nle
-                #     g = pin.computeGeneralizedGravity(self.robot.model, self.robot.data, self.q)
-
-
-                #     RR_mat = np.zeros((6,6))
-                #     RR_mat[:3,:3] = RR_mat[3:,3:] = oMf.rotation.copy()
-
-                #     qddot_des = RR_mat @ qddot_des
-                #     g = RR_mat @ g
-                #     wrench = mass @ qddot_des + g
-                #     wrench = np.delete(target_6d,[3,4])
                 
                 
                 msg = Float64MultiArray()
                 msg.data = xdes.to('cpu').tolist()
                 self.dronePosePublisher.publish(msg)
-
                     
 
 if __name__ == "__main__":

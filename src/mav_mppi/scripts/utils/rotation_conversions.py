@@ -654,3 +654,22 @@ def matrix_to_rotation_6d(matrix: torch.Tensor) -> torch.Tensor:
     """
     batch_dim = matrix.size()[:-2]
     return matrix[..., :2, :].clone().reshape(batch_dim + (6,))
+
+
+
+def xyz_to_se3(xyzrpy : torch.Tensor) -> torch.Tensor:
+    # Assumption : rpy = zeros(3)    
+    n_samples, n_timestep = xyzrpy.shape[:2]
+    device = xyzrpy.device
+    ones = torch.ones(n_samples, n_timestep, 1, device=device)
+    zeros = torch.zeros(n_samples, n_timestep, 3, device=device)
+    se3_bottom = torch.cat([zeros, ones], dim=-1)
+    se3_bottom = se3_bottom.unsqueeze(2) # n_samples, n_timestep, 1, 4
+
+    # 
+    eye_mat = torch.eye((3), device=device)
+    eye_mat = eye_mat.expand(n_samples, n_timestep, 3, 3)  # n_samples. n_timestep, 3, 3
+    
+    se3_top = torch.cat([eye_mat, xyzrpy.unsqueeze(-1)], dim=-1)
+
+    return se3_top.float()
