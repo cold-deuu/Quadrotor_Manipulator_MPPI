@@ -27,6 +27,7 @@ python3 kinova.py
 |2025-06-27|Test IK Control|
 |2025-07-04|Drone MPPI Controller|
 |2025-07-04|Kinova MPPI Controller|
+|2025-07-08|Whole-body MPPI Controller(미완)|
 
 ## To Do List ##
 - [x] Insert MPPI Controller (각각)
