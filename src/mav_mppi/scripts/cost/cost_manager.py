@@ -28,9 +28,9 @@ class CostManager:
         ## Weights
         # Pose Cost Weights
         self.stage_pose_weight = 50.0
-        self.stage_orientation_weight = 30.0
+        self.stage_orientation_weight = 5.0
         self.terminal_pose_weight = 40.0
-        self.terminal_orientation_weight = 30.0
+        self.terminal_orientation_weight = 5.0
 
         # Covariance Cost Weights
         self.covar_weight = 0.1
@@ -79,10 +79,15 @@ class CostManager:
         S = torch.zeros((self.n_sample), device=self.device)
         cost_stage = self.pose_cost.compute_stage_cost(self.eef_trajectories, self.target)
         cost_terminal = self.pose_cost.compute_terminal_cost(self.eef_trajectories, self.target)
+        cost_centering = self.joint_cost.compute_centering_cost(self.qSamples[...,3:])
+        cost_drone_pose = self.pose_cost.compute_drone_pose_cost(self.qSamples, self.eef_trajectories)
+        
         # cost_joint_limit = self.joint_cost.compute_joint_limit_cost(self.qSamples[..., 3:])
 
         S += cost_stage
         S += cost_terminal
+        S += cost_centering
+        S += cost_drone_pose
         # S += cost_joint_limit
 
         cost_log_dict = {

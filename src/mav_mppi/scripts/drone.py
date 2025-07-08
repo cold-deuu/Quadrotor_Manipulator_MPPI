@@ -9,7 +9,7 @@ from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64MultiArray
 
 import numpy as np
-from mav_mppi.scripts.trajectory.trajManager import jointTraj, SE3Traj
+from trajectory.trajManager import jointTraj, SE3Traj
 
 from time import time
 from scipy.spatial.transform import Rotation as R
@@ -21,21 +21,21 @@ from mppi_solver.drone_mppi import MPPI
 
 
 
-def pretty_matrix_print(matrix):
-    """
-    Prints a matrix in a visually appealing format.
+# def pretty_matrix_print(matrix):
+#     """
+#     Prints a matrix in a visually appealing format.
 
-    Args:
-        matrix (list of list of float): The matrix to print.
-    """
-    if not matrix or not isinstance(matrix[0], list):
-        print("Invalid matrix format. Please provide a 2D list.")
-        return
+#     Args:
+#         matrix (list of list of float): The matrix to print.
+#     """
+#     if not matrix or not isinstance(matrix[0], list):
+#         print("Invalid matrix format. Please provide a 2D list.")
+#         return
 
-    print("Matrix:")
-    for row in matrix:
-        formatted_row = " | ".join(f"{value:8.3f}" for value in row)
-        print(f"[ {formatted_row} ]")
+#     print("Matrix:")
+#     for row in matrix:
+#         formatted_row = " | ".join(f"{value:8.3f}" for value in row)
+#         print(f"[ {formatted_row} ]")
 
 def quaternion_to_rpy(quaternion):
     """

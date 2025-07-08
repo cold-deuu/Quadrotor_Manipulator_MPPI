@@ -1,5 +1,5 @@
 import torch
-
+import time
 # from rclpy.logging import get_logger
 
 
@@ -17,14 +17,44 @@ class StandardSamplling:
 
         # Standard Dev.
         self.sigma = torch.eye((self.n_action), device = self.device) # 표준편차 0.1
-        self.sigma[:3, :3] *= 5.0
-        self.sigma[3:, 3:] *= 3.0
+        self.sigma[:3, :3] *= 3.0
+        self.sigma[3:, 3:] *= 5.0
 
 
         self.sigma_matrix = self.sigma.expand(self.n_sample, self.n_horizon, -1, -1)
 
+        self.sigma_update = False
+        self.init_sigma: torch.Tensor = self.sigma.clone()
+
+        if self.sigma_update:
+            self.kappa = 0.005
+            self.kappa_eye = self.kappa * torch.eye((self.n_action), device=self.device)
+
+            self.update_fn = self.update_distribution_CMA_ES
+            # CMA-ES Parameter
+            self.mean  = torch.zeros((self.n_action), device=self.device)
+            self.ps = torch.zeros((self.n_action), device=self.device)  # Evolution path
+            self.pc = torch.zeros((self.n_action), device=self.device)  # Evolution path for covariance matrix
+            self.cc = torch.tensor(4 / (self.n_action + 4))
+            self.c1 = torch.tensor(2 / ((self.n_action + 1.3) ** 2))
+            # CMA-ES Computation optimization variables
+            self.kappa_eye = self.kappa * torch.eye((self.n_action), device=self.device)
+            self._one_minus_c1 = 1 - self.c1
+            self._cs_action = self.n_action + 5
+            self._cmu_action = (self.n_action + 2) ** 2
+            self._pc_const = self.cc * (2 - self.cc)
+            self.iteration = 0
+            # if params['sample']['sigma_update_type'] == "standard":
+            # self.update_fn = self.update_distribution_standard
+            # # Standard Parameter
+            # self.step_size_cov = 0.2
+
 
     def sampling(self):
+
+        seed = int(time.time() * 1000) % (2**32 - 1)  # 32-bit safe
+        torch.manual_seed(seed)
+
         standard_normal_noise = torch.randn(self.n_sample, self.n_horizon, self.n_action, device=self.device)
         self.sigma_matrix = self.sigma.expand(self.n_sample, self.n_horizon, -1, -1)
         noise = torch.matmul(standard_normal_noise.unsqueeze(-2), self.sigma_matrix).squeeze(-2)
@@ -52,4 +82,110 @@ class StandardSamplling:
         dq = v_prev * dt + 0.5 * u_prev * dt**2
         q = torch.cumsum(dq, dim=0) + q0
         return q.unsqueeze(0)
+    
+
+    def update_distribution(self, u: torch.Tensor, v: torch.Tensor, w: torch.Tensor, noise: torch.Tensor):
+        if self.sigma_update:
+            self.update_fn(u, v, w, noise)
+        return
+    
+
+    def update_distribution_standard(self, u: torch.Tensor, v: torch.Tensor, w: torch.Tensor, noise: torch.Tensor):
+        """Perform the covariance adaptation step of the MPPI controller.
+
+        This function implements the distribution update for Model Predictive
+        Path Integral (MPPI) control, comprising the following operations:
+        1. Compute per-sample deviations delta = u - noise.
+        2. Calculate weighted diagonal covariance update from squared deviations.
+        3. Blend the new estimate with the current covariance via step_size_cov.
+        4. Reset to initial covariance if NaNs are detected.
+        5. Regularize by adding kappa*I.
+        6. Expand the covariance across samples and the time horizon.
+        7. Log the updated diagonal entries for diagnostics.
+
+        Args:
+            u (torch.Tensor): Sampled control sequences, shape (n_sample, n_action).
+            v (torch.Tensor): (Unused) Placeholder for sampled trajectories.
+            w (torch.Tensor): Importance-sampling weights, shape (n_sample,).
+            noise (torch.Tensor): Noise offsets used to generate u, shape (n_sample, n_action).
+
+        Returns:
+            None: Updates self.sigma and self.sigma_matrix in place.
+        """
+        w = w.view(-1, 1, 1)
+        delta = u - noise.unsqueeze(0)
+        weighted_delta = w * (delta ** 2)
+        cov_update = torch.mean(torch.sum(weighted_delta, dim=0), dim=0)
+
+        cov_update_mat = torch.diag(cov_update)
+        self.sigma = (1 - self.step_size_cov) * self.sigma + self.step_size_cov * cov_update_mat
+
+        if torch.isnan(self.sigma).any().item():
+            self.sigma = self.init_sigma.clone()
+
+        self.sigma += self.kappa_eye
+        self.sigma_matrix = self.sigma.expand(self.n_sample, self.n_horizon, -1, -1)
+
+        print(f"Updated Sigma: {torch.diag(self.sigma)}")
+        return
+
+
+    def update_distribution_CMA_ES(self, u: torch.Tensor, v: torch.Tensor, w: torch.Tensor, noise: torch.Tensor):
+        """Update the CMA-ES distribution parameters (mean, evolution paths, and covariance matrix).
+
+        This method implements the distribution update step of the Covariance Matrix
+        Adaptation Evolution Strategy (CMA-ES). It performs the following operations:
+        1. Computes the effective sample size (μ_eff) from the weight vector w.
+        2. Determines adaptation rates c_sigma, c_c, c_1, and c_μ based on μ_eff and algorithm constants.
+        3. Updates the evolution paths p_sigma (step-size control) and p_c (covariance control).
+        4. Constructs rank-one and rank-μ updates for the covariance matrix (Σ).
+        5. Regularizes Σ with the κ-scaled identity matrix.
+        6. Expands Σ into Σ_matrix for trajectory sampling.
+        7. Increments the internal iteration counter.
+
+        Args:
+            u (torch.Tensor): Candidate solutions sorted by fitness,
+                shape (num_samples, dimension), where u[0] is the best solution.
+            v (torch.Tensor): Sampled trajectories, shape (num_samples, horizon, dimension).
+            w (torch.Tensor): Weight coefficients for each candidate solution,
+                shape (num_samples,).
+            noise (torch.Tensor): Noise samples for exploration (unused in this step).
+
+        Returns:
+            None: Updates the internal state (mean, covariance, evolution paths)
+                of the CMA-ES instance in place.
+        """
+        # Compute effective sample size (μ_eff)
+        self.mu_eff = (torch.sum(w, dim=0) ** 2) / (torch.sum(w ** 2, dim=0))
+        self.cmu = torch.min(self._one_minus_c1, 2 * ((self.mu_eff - 2 + 1) / self.mu_eff) / (self._cmu_action + self.mu_eff))
+        self.cs = torch.tensor((self.mu_eff.item() + 2) / (self._cs_action + self.mu_eff.item()))
+
+        # Update the mean and evolution paths
+        m_old = self.mean.clone()
+        self.mean = u[0].clone()
+        v = v[:,0,:]
+
+        inv_sqrt_diag = 1.0 / torch.sqrt(torch.diag(self.sigma))
+
+        y = (self.mean - m_old) * inv_sqrt_diag
+
+        coeff_sigma = torch.sqrt(self.cs * (2.0 - self.cs) * self.mu_eff)
+        self.ps = (1 - self.cs) * self.ps + coeff_sigma * y
+
+        h_sigma = (self.ps.norm() / torch.sqrt(1 - (1 - self.cs) ** (2 * (self.iteration + 1)))) < (1.4 + 2 / (self.n_action + 1))
+        self.pc = (1 - self.cc) * self.pc + h_sigma * torch.sqrt(self._pc_const * self.mu_eff) * y
+
+        # Update the covariance matrix
+        delta_rank1 = torch.outer(self.pc, self.pc) 
+
+        y_k = (v - m_old) * inv_sqrt_diag
+        delta_rankmu = torch.einsum('i,ij,ik->jk', w, y_k, y_k)
+
+        self.sigma = (self._one_minus_c1 - self.cmu) * self.sigma + self.c1 * delta_rank1 + self.cmu * delta_rankmu
+        self.sigma += self.kappa_eye
+        self.sigma_matrix = self.sigma.expand(self.n_sample, self.n_horizon, -1, -1)
+
+        self.iteration += 1
+        # self.logger.info(f"CMA-ES Updated Sigma Diagonals: {torch.diag(self.sigma)}")
+        return
     

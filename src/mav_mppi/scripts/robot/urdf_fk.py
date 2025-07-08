@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from robot import urdfparser as u2c
 from .transformation_matrix import *
-from mav_mppi.scripts.utils.rotation_conversions import xyz_to_se3
+from utils.rotation_conversions import xyz_to_se3
 
 class URDFFK:
     def __init__(self, device, urdf_path: str, root_link: str = "base", end_link: str = "j2s6s200_link_7"):
@@ -92,6 +92,9 @@ class URDFFK:
 
         se3_base = xyz_to_se3(q_base)
         base_to_arm = self.robot.forward_kinematics(q_arm, base_movement=base_movement) # (N, T, 4, 4)
+
+        print(f"se3_base : {se3_base.shape}")
+        print(f"base_to_arm : {base_to_arm.shape}")
 
         # # 3. 최종 world → EE 변환
         return torch.matmul(se3_base, base_to_arm)

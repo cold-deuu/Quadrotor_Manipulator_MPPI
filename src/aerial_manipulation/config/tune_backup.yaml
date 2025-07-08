@@ -1,0 +1,21 @@
+gains:
+  Kp:
+    x: 3.0
+    y: 3.0
+    z: 1.4
+  Kd:
+    x: 0.7
+    y: 0.7
+    z: 3.0
+  Kp_angle:
+    roll: 10.0
+    pitch: 10.0
+    yaw: 1.0
+  Kd_angle:
+    roll: 26.0
+    pitch: 26.0
+    yaw: 2.0
+  Ki:
+    x: 0.2
+    y: 0.2
+    z: 0.3

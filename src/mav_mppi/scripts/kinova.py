@@ -10,7 +10,7 @@ from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64MultiArray
 
 import numpy as np
-from mav_mppi.scripts.trajectory.trajManager import jointTraj, SE3Traj
+from trajectory.trajManager import jointTraj, SE3Traj
 
 from time import time
 from scipy.spatial.transform import Rotation as R
@@ -114,6 +114,9 @@ class controller:
 
 
     def main(self):
+        mppi_stime = 0
+        q_des = None
+        v_des = None
         while not rospy.is_shutdown():
             self.rate.sleep()
             if self.q is None or self.v is None: 
@@ -154,7 +157,6 @@ class controller:
                                 self.control_init = False
                                 print("Joint Control Finished")
 
-                    rospy.logwarn(f"oMi Current : {oMi}")
    
 
                 msg_arm = JointState()
@@ -162,44 +164,31 @@ class controller:
                 self.publisher.publish(msg_arm)
  
             else:
-                if not self.control_init: 
-                    stime = time()
-                    duration = 12.0
-                    xyzquat = np.array([1.0, 1.0, 1.1, 0.0, 0.0, 0.0, 1.0])
-
-                    targetSE3 = pin.SE3(1) 
-                    targetSE3.translation = xyzquat[:3].copy() + oMi.translation.copy()
-                    targetSE3.rotation = oMi.rotation
-                    print("targetSE3:", targetSE3)
-
-                    oMi_init = deepcopy(oMi) 
-                    self.se3Traj.setDuration(duration)
-                    self.se3Traj.setStartTime(stime)
-                    self.se3Traj.setInitSample(oMi_init)
-                    self.se3Traj.setTargetSample(targetSE3)
-                    self.qtmp[:3] = self.q[:3].copy()
-                    self.qtmp[3] = xyzquat_to_xyzrpy(self.q[:7])[2].copy()
+                if not self.control_init:
+                    mppi_stime = time()
                     self.control_init = True
+                q_des, v_des = self.mppi.compute_control_input()  
 
-                    msg_arm = JointState()
-                    msg_arm.effort = [float(t) for t in torque[:7]]
-                    self.publisher.publish(msg_arm)
+                # if (time()-mppi_stime<30.0):
+                #     rospy.loginfo("Here")
 
-
-                else:
-                    
-                    q_des, v_des = self.mppi.compute_control_input()     
-                    torque = self.robot.data.M[6:,6:] @ (400 * (q_des[3:] - self.q[7:]) + 40 * ( - self.v[6:])) + g[6:]
-                    
-                    print(f'oMi : {oMi}')
+                # else:
+                #     print(f"drone xyz : {self.q[:3]}")
+                #     rospy.logwarn("End")
                 
-                    msg_arm = JointState()
-                    msg_arm.effort = [float(t) for t in torque[:7]]
-                    self.publisher.publish(msg_arm)
 
-                    msg_drone = Float64MultiArray()
-                    msg_drone.data = q_des[:3].tolist()
-                    self.dronePosePublisher.publish(msg_drone)
+                    
+                torque = self.robot.data.M[6:,6:] @ (400 * (q_des[3:] - self.q[7:]) + 40 * ( - self.v[6:])) + g[6:]
+                
+                print(f'oMi : {oMi}')
+            
+                msg_arm = JointState()
+                msg_arm.effort = [float(t) for t in torque[:7]]
+                self.publisher.publish(msg_arm)
+
+                msg_drone = Float64MultiArray()
+                msg_drone.data = q_des[:3].tolist()
+                self.dronePosePublisher.publish(msg_drone)
 
 
 if __name__ == "__main__":

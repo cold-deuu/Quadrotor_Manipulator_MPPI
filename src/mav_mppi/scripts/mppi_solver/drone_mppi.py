@@ -3,6 +3,8 @@ import numpy as np
 import torch
 import os
 from filter.svg_filter import SavGolFilter
+from sampling.standard_normal_noise import StandardSamplling
+
 
 class MPPI():
     """drone MPPI"""
@@ -25,6 +27,9 @@ class MPPI():
         self.v_prev = torch.zeros((3), device = self.device)
         self.x_prev = torch.zeros((3), device = self.device)
         
+        # Sampling Lib
+        self.sample_gen = StandardSamplling(self.n_samples, self.n_timestep, self.n_action, self.device)
+
         # Sampling Level : Acceleration
         self.u = torch.zeros((self.n_samples, self.n_timestep, self.n_action), device = self.device)
         self.u_prev = torch.zeros((self.n_timestep, self.n_action), device = self.device)
@@ -114,10 +119,11 @@ class MPPI():
         target = torch.tensor([1.0, 2.0, 3.4], dtype = torch.float32, device = self.device)
         u = self.u_prev.clone()
         noise = self.generateNoiseAndSampling()
+        noise = self.sample_gen.sampling()
         v = noise + u
 
         trajectory = self.predict_trajectory(v, self.x_prev, self.v_prev, self.dt)
-        
+
 
         S = torch.zeros((self.n_samples), device = self.device)
         S += self.compute_stage_cost(trajectory, target)
@@ -131,6 +137,7 @@ class MPPI():
 
         u += w_epsilon
         
+        self.sample_gen.update_distribution(u, v, w, noise)
 
         self.u_prev = u.clone()
         self.u = u[0].clone()

@@ -671,5 +671,6 @@ def xyz_to_se3(xyzrpy : torch.Tensor) -> torch.Tensor:
     eye_mat = eye_mat.expand(n_samples, n_timestep, 3, 3)  # n_samples. n_timestep, 3, 3
     
     se3_top = torch.cat([eye_mat, xyzrpy.unsqueeze(-1)], dim=-1)
+    
 
-    return se3_top.float()
+    return torch.cat([se3_top, se3_bottom], dim = -2).float()

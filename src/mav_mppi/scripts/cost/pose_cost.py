@@ -22,6 +22,8 @@ class PoseCost():
         
 
     def compute_stage_cost(self, eefTraj, target_pose) -> torch.Tensor:
+
+        print(f"target_pose : {target_pose.pose}")
         ee_sample_pose = eefTraj[:,:-1,0:3,3].clone()
         ee_sample_orientation = eefTraj[:,:-1,0:3,0:3].clone()
         
@@ -95,3 +97,26 @@ class PoseCost():
 
         return terminal_cost
     
+
+    def compute_drone_pose_cost(self, qSamples, eefTraj):
+        # qSample : n_samp, n_times, n_dof
+        drone_z = qSamples[:,:,2].clone() # n_samp, n_times,
+        eef_z = eefTraj[:,:,2,3].clone() # n_samp, n_times,
+        
+
+
+        constraint_idx = drone_z < eef_z
+
+        stepwise_cost = constraint_idx.float() * 1e10  # shape: (n_samples, n_horizon)
+
+        gamma = self.gamma ** torch.arange(self.n_horizen, device=self.device)
+        stepwise_cost *= gamma 
+        cost = torch.sum(stepwise_cost, dim=1)  # shape: (n_samples,)
+
+        import rospy
+
+        rospy.logwarn(f"dronez : {drone_z}")
+        rospy.logwarn(f"eefz : {eef_z}")
+       
+       
+        return cost

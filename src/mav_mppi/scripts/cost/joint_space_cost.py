@@ -12,7 +12,8 @@ class JointSpaceCost:
         self.joint_traj_weight = joint_traj_weight
         self.gamma = gamma
 
-        self.qCenter =torch.tensor([0.0, 0.0, 0.0, (-3.0718-0.0698)/2, 0.0, (3.7525-0.0175)/2, 0.0], device = self.device)
+        self.qCenter =torch.tensor([1.57, 1.7, 0, 4.4, 0, 4.71, 0.0], device = self.device)
+
 
 
     def compute_centering_cost(self, qSample: torch.Tensor) -> torch.Tensor:

@@ -9,7 +9,7 @@ from datetime import datetime
 
 # Sampling Library
 from robot import urdfparser as u2c
-from mav_mppi.scripts.sampling.standard_normal_noise import StandardSamplling
+from sampling.standard_normal_noise import StandardSamplling
 
 # Cost
 from cost.cost_manager import CostManager
@@ -50,8 +50,8 @@ class whole_MPPI:
         self.n_action = 10
         self.n_manipulator_dof = 7
         self.n_mobile_dof = 3
-        self.n_samples = 100
-        self.n_horizon = 32
+        self.n_samples = 300
+        self.n_horizon = 10
         self.dt = 0.01
 
 
@@ -91,17 +91,16 @@ class whole_MPPI:
         #     self.target_pose_drone = target_pose_drone
 
         
-        self._lambda = 0.1
+        self._lambda = 0.01
         self.cost_manager = CostManager(self.n_samples, self.n_horizon, self.n_action, self._lambda, self.device)
 
         self.svg_filter = SavGolFilter(self.n_action)
 
-        self.sigma = torch.eye((self.n_action), device = self.device) *30.0
 
     def check_reach(self):
 
         fk_result = self.fk_urdf.compute_fk_cpu(self.q_des)
-        print(f"fk_result : {fk_result}")
+        # print(f"fk_result : {fk_result}")
 
         if isinstance(fk_result, np.ndarray):
             fk_result = torch.tensor(fk_result, dtype=torch.float32)
@@ -140,15 +139,14 @@ class whole_MPPI:
 
         # 초기 설정
         u = self.u_prev.clone() # 이전 가속도
-        self._qddot = u[0].clone() # 현재의 가속도
 
         # 샘플링
         noise = self.sample_gen.sampling()
         v = u.unsqueeze(0) + noise
         q_samples = self.sample_gen.get_sample_joint(v, self.q, self.qdot, self.dt)
         trajectory = self.fk_urdf.compute_fk_whole_gpu(q_samples)
+        print(trajectory[:,:,2,3].shape) # n_samp, n_times,
 
-        print(f"trajectory : {trajectory}")
     
         none_joint_trajs = torch.zeros((self.n_samples, self.n_horizon, self.n_action), device=self.device)
         self.cost_manager.update_pose_cost(q_samples, v, trajectory, none_joint_trajs, self.target_pose)
@@ -161,17 +159,16 @@ class whole_MPPI:
         w_expanded = w.view(-1, 1,1) # (n_samples, 1, 1) : 아래 noise(n_samples, n_horizon, n_action)와 연산하기 위해서
 
         w_eps = torch.sum(w_expanded * noise, dim = 0) # w_eps.shape = (n_horizon, n_action)
-        w_eps = self.svg_filter.savgol_filter_torch(w_eps,window_size=9,polyorder=2)
+        w_eps = self.svg_filter.savgol_filter_torch(w_eps,window_size=5,polyorder=2)
 
         # # 제어 입력(가속도) 업데이트
         u+= w_eps
         self.u_prev = u.clone()
         self.u = u[0].clone() # 현재 timestep에서 실행할 가속도 명령
 
-        self.qdot_des = self.qdot + self.u * self.dt
-        self.q_des = self.q + self.qdot * self.dt + 0.5 * self.u * self.dt * self.dt
+        self.qdot_des = self.qdot.clone() + self.u.clone() * self.dt
+        self.q_des = self.q.clone() + self.qdot.clone() * self.dt + 0.5 * self.u.clone() * self.dt**2
 
-        # print(f"q : {self.q}")
         # print(f"qdot : {self.qdot}")
 
         qdes_np = self.q_des.to('cpu').numpy()
@@ -209,7 +206,7 @@ class whole_MPPI:
         # Control Input : xyz,q1 - q7
         q_mppi = np.delete(q,[3,4,5])
         v_mppi = np.delete(v,[3,4,5])
-
+        # v_mppi[:3] = np.zeros((3))
         self.q = torch.tensor(q_mppi).to(self.device)
         self.qdot = torch.tensor(v_mppi).to(self.device)
 
