@@ -9,7 +9,7 @@ from datetime import datetime
 
 # Sampling Library
 from robot import urdfparser as u2c
-from mav_mppi.scripts.sampling.standard_normal_noise import StandardSamplling
+from sampling.standard_normal_noise import StandardSamplling
 
 # Cost
 from cost.cost_manager import CostManager
@@ -24,7 +24,7 @@ from utils.rotation_conversions import euler_angles_to_matrix, matrix_to_euler_a
 # Filter : MPPI
 from filter.svg_filter import SavGolFilter
 
-class whole_MPPI:
+class MPPI:
     """Manipulator MPPI"""
     def __init__(self, target_pose=None):
         # Logger 및 device 설정
@@ -84,8 +84,11 @@ class whole_MPPI:
         root_path = rospack.get_path("aerial_manipulation")
         urdf_path = os.path.join(root_path, "urdf", "aerial_manipulator_gpu.urdf")
 
+        print(f"urdf_path : {urdf_path}")
+
         # URDF 기반 GPU FK 초기화
         self.fk_urdf = URDFFK(
+            self.device,
             urdf_path,
             root_link="base",
             end_link="j2s7s300_link_7"
@@ -97,9 +100,8 @@ class whole_MPPI:
         self.cnt = 0
 
     def check_reach(self, q_full):
-        # fk_result = self.fk_urdf.compute_fk_cpu(self.base_pose, self._q)
 
-        fk_result = self.fk_urdf.compute_fk_cpu(self.base_pose, self.qdes)
+        fk_result = self.fk_urdf.compute_fk_cpu(q_full)
         if isinstance(fk_result, np.ndarray):
             fk_result = torch.tensor(fk_result, dtype=torch.float32)
 

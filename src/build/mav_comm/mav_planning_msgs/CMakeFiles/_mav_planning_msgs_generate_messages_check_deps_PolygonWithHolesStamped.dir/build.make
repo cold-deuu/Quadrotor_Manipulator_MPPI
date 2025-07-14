@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /home/chan/aerial_ws/src/build
 include mav_comm/mav_planning_msgs/CMakeFiles/_mav_planning_msgs_generate_messages_check_deps_PolygonWithHolesStamped.dir/progress.make
 
 mav_comm/mav_planning_msgs/CMakeFiles/_mav_planning_msgs_generate_messages_check_deps_PolygonWithHolesStamped:
-	cd /home/chan/aerial_ws/src/build/mav_comm/mav_planning_msgs && ../../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py mav_planning_msgs /home/chan/aerial_ws/src/mav_comm/mav_planning_msgs/msg/PolygonWithHolesStamped.msg mav_planning_msgs/Polygon2D:mav_planning_msgs/Point2D:std_msgs/Header:mav_planning_msgs/PolygonWithHoles
+	cd /home/chan/aerial_ws/src/build/mav_comm/mav_planning_msgs && ../../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py mav_planning_msgs /home/chan/aerial_ws/src/mav_comm/mav_planning_msgs/msg/PolygonWithHolesStamped.msg mav_planning_msgs/PolygonWithHoles:mav_planning_msgs/Polygon2D:std_msgs/Header:mav_planning_msgs/Point2D
 
 _mav_planning_msgs_generate_messages_check_deps_PolygonWithHolesStamped: mav_comm/mav_planning_msgs/CMakeFiles/_mav_planning_msgs_generate_messages_check_deps_PolygonWithHolesStamped
 _mav_planning_msgs_generate_messages_check_deps_PolygonWithHolesStamped: mav_comm/mav_planning_msgs/CMakeFiles/_mav_planning_msgs_generate_messages_check_deps_PolygonWithHolesStamped.dir/build.make

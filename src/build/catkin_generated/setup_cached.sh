@@ -8,7 +8,10 @@
 
 # modified environment variables
 export CMAKE_PREFIX_PATH="/home/chan/aerial_ws/src/build/devel:$CMAKE_PREFIX_PATH"
-export PATH='/opt/ros/noetic/bin:/home/chan/miniconda3/condabin:/home/chan/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin'
+export LD_LIBRARY_PATH="/home/chan/aerial_ws/src/build/devel/lib:$LD_LIBRARY_PATH"
+export PATH='/opt/ros/noetic/bin:/home/chan/.local/bin:/home/chan/miniconda3/condabin:/home/chan/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin'
+export PKG_CONFIG_PATH="/home/chan/aerial_ws/src/build/devel/lib/pkgconfig:$PKG_CONFIG_PATH"
 export PWD='/home/chan/aerial_ws/src/build'
+export PYTHONPATH="/home/chan/aerial_ws/src/build/devel/lib/python3/dist-packages:$PYTHONPATH"
 export ROSLISP_PACKAGE_DIRECTORIES="/home/chan/aerial_ws/src/build/devel/share/common-lisp:$ROSLISP_PACKAGE_DIRECTORIES"
 export ROS_PACKAGE_PATH="/home/chan/aerial_ws/src:$ROS_PACKAGE_PATH"

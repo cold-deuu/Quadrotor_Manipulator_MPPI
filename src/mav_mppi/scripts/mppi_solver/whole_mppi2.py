@@ -50,7 +50,7 @@ class whole_MPPI:
         self.n_action = 10
         self.n_manipulator_dof = 7
         self.n_mobile_dof = 3
-        self.n_samples = 300
+        self.n_samples = 1000
         self.n_horizon = 10
         self.dt = 0.01
 
@@ -85,11 +85,6 @@ class whole_MPPI:
         else:
             self.target_pose = target_pose
 
-        # if target_pose_drone is None:
-        #     self.target_pose_drone = torch.tensor([1.0, 2.0, 3.4], dtype = torch.float32, device = self.device)
-        # else:
-        #     self.target_pose_drone = target_pose_drone
-
         
         self._lambda = 0.01
         self.cost_manager = CostManager(self.n_samples, self.n_horizon, self.n_action, self._lambda, self.device)
@@ -97,10 +92,17 @@ class whole_MPPI:
         self.svg_filter = SavGolFilter(self.n_action)
 
 
+        # TEST
+        self.q_sensor = None
+
     def check_reach(self):
 
         fk_result = self.fk_urdf.compute_fk_cpu(self.q_des)
-        # print(f"fk_result : {fk_result}")
+
+        # if self.q_sensor is not None:
+        #     qsensor=  torch.tensor(self.q_sensor)
+        #     fk_result2 = self.fk_urdf.compute_fk_cpu(qsensor)
+        #     print(f"oMi Torch :{fk_result2}")
 
         if isinstance(fk_result, np.ndarray):
             fk_result = torch.tensor(fk_result, dtype=torch.float32)
@@ -123,63 +125,64 @@ class whole_MPPI:
             return False
         
     
-    def predict_trajectory(self, samples: torch.Tensor, q: torch.Tensor, qdot: torch.Tensor, dt):
-        qdot0 = qdot.unsqueeze(0).unsqueeze(0).expand(self.n_samples, 1, self.n_mobile_dof)
-        q0 = q.unsqueeze(0).unsqueeze(0).expand(self.n_samples, 1, self.n_mobile_dof)
-        v = torch.cumsum(samples * dt, dim=1) + qdot0 
+    def warm_start(self, prev_optimal):
+        n_timestep, n_dof = prev_optimal.shape
+        tmp = torch.zeros((n_timestep, n_dof), device=self.device)
+        tmp[:-1,:] = prev_optimal[1:,:].clone()
 
-        v_prev = torch.cat([qdot0, v[:, :-1, :]], dim=1)
 
-        dq = v_prev * dt + 0.5 * samples * dt**2
-        q = torch.cumsum(dq, dim=1) + q0
-        return q 
+        print(f"self.uprev = {self.u_prev}")
+        print(f"Tmp : {tmp}")
+        print(f"UPrev : {prev_optimal}")
+
+
+
+        return tmp
+        
 
 
     def compute_control_input(self):
+        
+        # u = self.warm_start(self.u_prev)
+        # print(f"U : {u}")
+        u = self.u_prev.clone() 
 
-        # 초기 설정
-        u = self.u_prev.clone() # 이전 가속도
-
-        # 샘플링
         noise = self.sample_gen.sampling()
         v = u.unsqueeze(0) + noise
+        # v = self.apply_constraint(v_)
         q_samples = self.sample_gen.get_sample_joint(v, self.q, self.qdot, self.dt)
-        trajectory = self.fk_urdf.compute_fk_whole_gpu(q_samples)
-        print(trajectory[:,:,2,3].shape) # n_samp, n_times,
+        # print(f"Noise + u : {q_samples[0,:,:]}")
 
+        trajectory = self.fk_urdf.compute_fk_whole_gpu(q_samples)
+
+        print(f"oMi Traj : {trajectory[:,0,:3,3]}")
     
         none_joint_trajs = torch.zeros((self.n_samples, self.n_horizon, self.n_action), device=self.device)
         self.cost_manager.update_pose_cost(q_samples, v, trajectory, none_joint_trajs, self.target_pose)
         self.cost_manager.update_covar_cost(u, v, self.sample_gen.sigma_matrix)
         S, _ = self.cost_manager.compute_all_cost()
-
-
-        # # weight 계산 + 부드럽게 필터링
+        # print(f"Cost : {S}")
         w = self.compute_weights(S, self._lambda) # (n_samples,)
-        w_expanded = w.view(-1, 1,1) # (n_samples, 1, 1) : 아래 noise(n_samples, n_horizon, n_action)와 연산하기 위해서
+        w_expanded = w.view(-1, 1,1) # (n_samples, 1, 1)
 
         w_eps = torch.sum(w_expanded * noise, dim = 0) # w_eps.shape = (n_horizon, n_action)
-        w_eps = self.svg_filter.savgol_filter_torch(w_eps,window_size=5,polyorder=2)
+        # w_eps = self.svg_filter.savgol_filter_torch(w_eps,window_size=3,polyorder=2)
 
-        # # 제어 입력(가속도) 업데이트
         u+= w_eps
         self.u_prev = u.clone()
-        self.u = u[0].clone() # 현재 timestep에서 실행할 가속도 명령
-
+        self.u = u[0].clone() 
+        # print(f"U0 : {self.u}")
         self.qdot_des = self.qdot.clone() + self.u.clone() * self.dt
-        self.q_des = self.q.clone() + self.qdot.clone() * self.dt + 0.5 * self.u.clone() * self.dt**2
+        self.q_des = self.q.clone() + self.qdot_des.clone() * self.dt
 
-        # print(f"qdot : {self.qdot}")
 
         qdes_np = self.q_des.to('cpu').numpy()
         vdes_np = self.qdot_des.to('cpu').numpy()
-
-        # print(f"target : {self.target_pose.pose}")
-
-
-        # 종료 조건 : 목표에 도달하면
+        # print(f"QDES : {qdes_np}")
+        # print(f"VDES : {vdes_np}")
         if self.check_reach():
             print("Reach !")
+            # return qdes_np, vdes_np
             return None
         
         return qdes_np, vdes_np
@@ -187,18 +190,23 @@ class whole_MPPI:
 
     
     def compute_weights(self, S: torch.Tensor, _lambda) -> torch.Tensor:
-        # 최소값 계산 (rho)
-        rho = S.min()  # (scalar)
+        rho = S.min() 
+        # print(f"Min Cost : {rho}")
+        scaled_S = (-1.0 / _lambda) * (S - rho) 
+        eta = torch.exp(scaled_S).sum() 
 
-        # eta 계산
-        scaled_S = (-1.0 / _lambda) * (S - rho) # softmin 구조
-        eta = torch.exp(scaled_S).sum()  # (scalar) : 정규화를 위한 전체 합
-
-        # 각 샘플의 weight 계산
-        weights = torch.exp(scaled_S) / eta  # 정규화
+        weights = torch.exp(scaled_S) / eta  
 
         return weights
 
+
+    def apply_constraint(self, v):
+        v = torch.clamp(
+        v,
+        min=torch.tensor([-3000, -3000, -3000, -100, -100, -100, -100, -100, -100, -100], device=self.device),
+        max=torch.tensor([3000, 3000, 3000 , 100, 100, 100, 100, 100,  100, 100], device=self.device)
+        )
+        return v
 
     def update_state(self, q, v):
         # Floating Base Coordinate : [x,y,z, phi, theta, psi]
@@ -210,4 +218,8 @@ class whole_MPPI:
         self.q = torch.tensor(q_mppi).to(self.device)
         self.qdot = torch.tensor(v_mppi).to(self.device)
 
+
+        # TEST
+        self.q_sensor = q_mppi.copy()
+        
         

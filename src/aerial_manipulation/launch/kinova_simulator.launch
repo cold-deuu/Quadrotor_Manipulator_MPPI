@@ -1,0 +1,26 @@
+<launch>
+  <param name="robot_description" command="cat $(find aerial_manipulation)/urdf/kinova_urdf/kinova.urdf.xacro" />
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="paused" value="true"/>
+  </include>
+  <!-- 2. xacro로 URDF 파라미터 로드 -->
+
+  <!-- 3. robot_state_publisher 실행 -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen" />
+
+  <!-- 4. Rviz (선택사항) -->
+  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find franka_panda_description)/config/your_config.rviz" /> -->
+
+  <!-- 5. Gazebo에 로봇 스폰 -->
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
+        args="-param robot_description -urdf -model kinova" output="screen" />
+
+
+  <!-- 6. 컨트롤러 설정 로드 -->
+  <rosparam file="$(find aerial_manipulation)/config/controller.yaml" command="load" />
+  <!-- <node name="robot_sp" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model panda -file $(find franka_panda_description)/franka_single/panda_arm_l.urdf"/> -->
+
+  <!-- 7. 컨트롤러 스포너 실행 -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"
+        args="joint_state_controller kinova_effort_controller" />
+</launch>

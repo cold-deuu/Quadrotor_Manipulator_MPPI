@@ -1,0 +1,75 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+  <xacro:macro name="kinova_gazebo" params="command_interface:=EffortJointInterface">
+    <!-- 각 조인트에 transmission 설정 -->
+    <transmission name="j2s7s300_joint_1">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="j2s7s300_joint_1">
+        <hardwareInterface>hardware_interface/${command_interface}</hardwareInterface>
+      </joint>
+      <actuator name="j2s7s300_joint_1">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <transmission name="j2s7s300_joint_2">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="j2s7s300_joint_2">
+        <hardwareInterface>hardware_interface/${command_interface}</hardwareInterface>
+      </joint>
+      <actuator name="j2s7s300_joint_2">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <transmission name="j2s7s300_joint_3">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="j2s7s300_joint_3">
+        <hardwareInterface>hardware_interface/${command_interface}</hardwareInterface>
+      </joint>
+      <actuator name="j2s7s300_joint_3">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <transmission name="j2s7s300_joint_4">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="j2s7s300_joint_4">
+        <hardwareInterface>hardware_interface/${command_interface}</hardwareInterface>
+      </joint>
+      <actuator name="j2s7s300_joint_4">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <transmission name="j2s7s300_joint_5">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="j2s7s300_joint_5">
+        <hardwareInterface>hardware_interface/${command_interface}</hardwareInterface>
+      </joint>
+      <actuator name="j2s7s300_joint_5">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <transmission name="j2s7s300_joint_6">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="j2s7s300_joint_6">
+        <hardwareInterface>hardware_interface/${command_interface}</hardwareInterface>
+      </joint>
+      <actuator name="j2s7s300_joint_6">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <transmission name="j2s7s300_joint_7">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="j2s7s300_joint_7">
+        <hardwareInterface>hardware_interface/${command_interface}</hardwareInterface>
+      </joint>
+      <actuator name="j2s7s300_joint_7">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+  </xacro:macro>
+</robot>

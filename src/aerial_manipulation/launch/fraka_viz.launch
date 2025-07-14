@@ -1,0 +1,15 @@
+<launch>
+    <!-- URDF 로딩 -->
+    <param name="robot_description" command="$(find xacro)/xacro $(find aerial_manipulation)/urdf/kinova_urdf/kinova.urdf.xacro" />
+
+    <!-- Joint State Publisher GUI 실행 -->
+    <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
+
+    <!-- Robot State Publisher 실행 -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+    <!-- RViz 실행 -->
+    <node name='rviz' pkg='rviz' type='rviz'/>
+
+</launch>
+

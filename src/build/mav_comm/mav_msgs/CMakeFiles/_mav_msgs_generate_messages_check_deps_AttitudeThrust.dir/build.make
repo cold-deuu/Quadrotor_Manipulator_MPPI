@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /home/chan/aerial_ws/src/build
 include mav_comm/mav_msgs/CMakeFiles/_mav_msgs_generate_messages_check_deps_AttitudeThrust.dir/progress.make
 
 mav_comm/mav_msgs/CMakeFiles/_mav_msgs_generate_messages_check_deps_AttitudeThrust:
-	cd /home/chan/aerial_ws/src/build/mav_comm/mav_msgs && ../../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py mav_msgs /home/chan/aerial_ws/src/mav_comm/mav_msgs/msg/AttitudeThrust.msg geometry_msgs/Vector3:std_msgs/Header:geometry_msgs/Quaternion
+	cd /home/chan/aerial_ws/src/build/mav_comm/mav_msgs && ../../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py mav_msgs /home/chan/aerial_ws/src/mav_comm/mav_msgs/msg/AttitudeThrust.msg geometry_msgs/Quaternion:geometry_msgs/Vector3:std_msgs/Header
 
 _mav_msgs_generate_messages_check_deps_AttitudeThrust: mav_comm/mav_msgs/CMakeFiles/_mav_msgs_generate_messages_check_deps_AttitudeThrust
 _mav_msgs_generate_messages_check_deps_AttitudeThrust: mav_comm/mav_msgs/CMakeFiles/_mav_msgs_generate_messages_check_deps_AttitudeThrust.dir/build.make

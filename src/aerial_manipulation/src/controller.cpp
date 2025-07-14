@@ -193,7 +193,6 @@ public: void onUpdate()
     if (std::abs(time - 0.001) < 1e-6)
         prev_time = 0;
 
-    // ✅ 링크 가져오기
     physics::LinkPtr quad = this->model->GetLink(linkName);
 
     std::string kinova_prefix = namespc + "::j2s7s300_joint_";

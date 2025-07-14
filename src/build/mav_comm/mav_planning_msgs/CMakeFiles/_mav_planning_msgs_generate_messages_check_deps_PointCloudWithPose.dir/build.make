@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /home/chan/aerial_ws/src/build
 include mav_comm/mav_planning_msgs/CMakeFiles/_mav_planning_msgs_generate_messages_check_deps_PointCloudWithPose.dir/progress.make
 
 mav_comm/mav_planning_msgs/CMakeFiles/_mav_planning_msgs_generate_messages_check_deps_PointCloudWithPose:
-	cd /home/chan/aerial_ws/src/build/mav_comm/mav_planning_msgs && ../../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py mav_planning_msgs /home/chan/aerial_ws/src/mav_comm/mav_planning_msgs/msg/PointCloudWithPose.msg geometry_msgs/TransformStamped:sensor_msgs/PointCloud2:std_msgs/Header:sensor_msgs/PointField:geometry_msgs/Transform:geometry_msgs/Quaternion:geometry_msgs/Vector3
+	cd /home/chan/aerial_ws/src/build/mav_comm/mav_planning_msgs && ../../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py mav_planning_msgs /home/chan/aerial_ws/src/mav_comm/mav_planning_msgs/msg/PointCloudWithPose.msg geometry_msgs/Transform:sensor_msgs/PointField:geometry_msgs/TransformStamped:sensor_msgs/PointCloud2:geometry_msgs/Quaternion:geometry_msgs/Vector3:std_msgs/Header
 
 _mav_planning_msgs_generate_messages_check_deps_PointCloudWithPose: mav_comm/mav_planning_msgs/CMakeFiles/_mav_planning_msgs_generate_messages_check_deps_PointCloudWithPose
 _mav_planning_msgs_generate_messages_check_deps_PointCloudWithPose: mav_comm/mav_planning_msgs/CMakeFiles/_mav_planning_msgs_generate_messages_check_deps_PointCloudWithPose.dir/build.make

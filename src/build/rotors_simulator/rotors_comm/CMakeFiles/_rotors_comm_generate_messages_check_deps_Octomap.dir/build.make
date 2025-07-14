@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /home/chan/aerial_ws/src/build
 include rotors_simulator/rotors_comm/CMakeFiles/_rotors_comm_generate_messages_check_deps_Octomap.dir/progress.make
 
 rotors_simulator/rotors_comm/CMakeFiles/_rotors_comm_generate_messages_check_deps_Octomap:
-	cd /home/chan/aerial_ws/src/build/rotors_simulator/rotors_comm && ../../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py rotors_comm /home/chan/aerial_ws/src/rotors_simulator/rotors_comm/srv/Octomap.srv geometry_msgs/Point:std_msgs/Header:octomap_msgs/Octomap
+	cd /home/chan/aerial_ws/src/build/rotors_simulator/rotors_comm && ../../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py rotors_comm /home/chan/aerial_ws/src/rotors_simulator/rotors_comm/srv/Octomap.srv std_msgs/Header:geometry_msgs/Point:octomap_msgs/Octomap
 
 _rotors_comm_generate_messages_check_deps_Octomap: rotors_simulator/rotors_comm/CMakeFiles/_rotors_comm_generate_messages_check_deps_Octomap
 _rotors_comm_generate_messages_check_deps_Octomap: rotors_simulator/rotors_comm/CMakeFiles/_rotors_comm_generate_messages_check_deps_Octomap.dir/build.make

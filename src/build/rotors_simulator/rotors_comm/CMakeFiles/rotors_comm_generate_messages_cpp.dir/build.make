@@ -68,8 +68,8 @@ devel/include/rotors_comm/WindSpeed.h: /opt/ros/noetic/share/gencpp/msg.h.templa
 
 devel/include/rotors_comm/Octomap.h: /opt/ros/noetic/lib/gencpp/gen_cpp.py
 devel/include/rotors_comm/Octomap.h: ../rotors_simulator/rotors_comm/srv/Octomap.srv
-devel/include/rotors_comm/Octomap.h: /opt/ros/noetic/share/geometry_msgs/msg/Point.msg
 devel/include/rotors_comm/Octomap.h: /opt/ros/noetic/share/std_msgs/msg/Header.msg
+devel/include/rotors_comm/Octomap.h: /opt/ros/noetic/share/geometry_msgs/msg/Point.msg
 devel/include/rotors_comm/Octomap.h: /opt/ros/noetic/share/octomap_msgs/msg/Octomap.msg
 devel/include/rotors_comm/Octomap.h: /opt/ros/noetic/share/gencpp/msg.h.template
 devel/include/rotors_comm/Octomap.h: /opt/ros/noetic/share/gencpp/srv.h.template

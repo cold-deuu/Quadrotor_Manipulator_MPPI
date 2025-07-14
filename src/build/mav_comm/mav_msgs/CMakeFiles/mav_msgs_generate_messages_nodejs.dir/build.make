@@ -71,9 +71,9 @@ devel/share/gennodejs/ros/mav_msgs/msg/Actuators.js: /opt/ros/noetic/share/std_m
 
 devel/share/gennodejs/ros/mav_msgs/msg/AttitudeThrust.js: /opt/ros/noetic/lib/gennodejs/gen_nodejs.py
 devel/share/gennodejs/ros/mav_msgs/msg/AttitudeThrust.js: ../mav_comm/mav_msgs/msg/AttitudeThrust.msg
+devel/share/gennodejs/ros/mav_msgs/msg/AttitudeThrust.js: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
 devel/share/gennodejs/ros/mav_msgs/msg/AttitudeThrust.js: /opt/ros/noetic/share/geometry_msgs/msg/Vector3.msg
 devel/share/gennodejs/ros/mav_msgs/msg/AttitudeThrust.js: /opt/ros/noetic/share/std_msgs/msg/Header.msg
-devel/share/gennodejs/ros/mav_msgs/msg/AttitudeThrust.js: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chan/aerial_ws/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating Javascript code from mav_msgs/AttitudeThrust.msg"
 	cd /home/chan/aerial_ws/src/build/mav_comm/mav_msgs && ../../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/gennodejs/cmake/../../../lib/gennodejs/gen_nodejs.py /home/chan/aerial_ws/src/mav_comm/mav_msgs/msg/AttitudeThrust.msg -Imav_msgs:/home/chan/aerial_ws/src/mav_comm/mav_msgs/msg -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg -Inav_msgs:/opt/ros/noetic/share/nav_msgs/cmake/../msg -Iactionlib_msgs:/opt/ros/noetic/share/actionlib_msgs/cmake/../msg -p mav_msgs -o /home/chan/aerial_ws/src/build/devel/share/gennodejs/ros/mav_msgs/msg
 

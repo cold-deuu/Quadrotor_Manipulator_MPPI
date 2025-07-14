@@ -23,14 +23,14 @@ class CostManager:
         self.n_action = n_action
         self._lambda = _lambda
         self.alpha = 0.1
-        self.gamma = 0.98
+        self.gamma = 1.0
 
         ## Weights
         # Pose Cost Weights
-        self.stage_pose_weight = 50.0
-        self.stage_orientation_weight = 5.0
-        self.terminal_pose_weight = 40.0
-        self.terminal_orientation_weight = 5.0
+        self.stage_pose_weight = 100.0
+        self.stage_orientation_weight = 10.0
+        self.terminal_pose_weight = 300.0
+        self.terminal_orientation_weight = 30.0
 
         # Covariance Cost Weights
         self.covar_weight = 0.1
@@ -39,7 +39,7 @@ class CostManager:
         self.action_weight = 0.0
 
         # Joint Space Cost Weights
-        self.centering_cost = 1.0
+        self.centering_cost = 100.0
         self.joint_tracking_weight = 1.0
 
         # Cost Library
@@ -79,24 +79,23 @@ class CostManager:
         S = torch.zeros((self.n_sample), device=self.device)
         cost_stage = self.pose_cost.compute_stage_cost(self.eef_trajectories, self.target)
         cost_terminal = self.pose_cost.compute_terminal_cost(self.eef_trajectories, self.target)
-        cost_centering = self.joint_cost.compute_centering_cost(self.qSamples[...,3:])
+        # cost_centering = self.joint_cost.compute_centering_cost(self.qSamples[...,3:])
         cost_drone_pose = self.pose_cost.compute_drone_pose_cost(self.qSamples, self.eef_trajectories)
-        
         # cost_joint_limit = self.joint_cost.compute_joint_limit_cost(self.qSamples[..., 3:])
+
+        # print(f"Stage Cost : {cost_stage}")
+        # print(f"Terminal Cost : {cost_terminal}")
 
         S += cost_stage
         S += cost_terminal
-        S += cost_centering
-        S += cost_drone_pose
+        # S += cost_centering
+        # S += cost_drone_pose
         # S += cost_joint_limit
 
         cost_log_dict = {
             "stage_cost": float(cost_stage.mean().cpu()),
             "terminal_cost": float(cost_terminal.mean().cpu()),
-            # "joint_limit_cost": float(cost_joint_limit.mean().cpu())
         }
-
-        # print(f"cost_log_dict : \n{cost_log_dict}")
 
         # 전체, 그리고 각 cost 항목도 함께 반환
         return S, cost_log_dict

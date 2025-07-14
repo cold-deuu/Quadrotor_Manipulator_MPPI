@@ -68,5 +68,6 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "bit": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "/home/chan/aerial_ws/src/aerial_manipulation"
 }

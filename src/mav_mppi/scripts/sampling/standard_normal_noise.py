@@ -17,8 +17,8 @@ class StandardSamplling:
 
         # Standard Dev.
         self.sigma = torch.eye((self.n_action), device = self.device) # 표준편차 0.1
-        self.sigma[:3, :3] *= 3.0
-        self.sigma[3:, 3:] *= 5.0
+        self.sigma[:3, :3] *= 0.03
+        self.sigma[3:, 3:] *= 3.0
 
 
         self.sigma_matrix = self.sigma.expand(self.n_sample, self.n_horizon, -1, -1)
@@ -52,21 +52,32 @@ class StandardSamplling:
 
     def sampling(self):
 
-        seed = int(time.time() * 1000) % (2**32 - 1)  # 32-bit safe
-        torch.manual_seed(seed)
-
-        standard_normal_noise = torch.randn(self.n_sample, self.n_horizon, self.n_action, device=self.device)
+        # seed = int(time.time() * 1000) % (2**32 - 1)  # 32-bit safe
+        # torch.manual_seed(seed)
+        standard_normal_noise = torch.randn(self.n_sample, 1, self.n_action, device=self.device)
+        standard_normal_noise = standard_normal_noise.expand(-1, self.n_horizon, -1)
+        # standard_normal_noise = torch.randn(self.n_sample, self.n_horizon, self.n_action, device=self.device)
         self.sigma_matrix = self.sigma.expand(self.n_sample, self.n_horizon, -1, -1)
         noise = torch.matmul(standard_normal_noise.unsqueeze(-2), self.sigma_matrix).squeeze(-2)
         return noise
 
 
     def get_sample_joint(self, samples: torch.Tensor, q: torch.Tensor, qdot: torch.Tensor, dt):
+        # samples : (N, T, A)
+        
+        # qdot0 는 (A,) 사이즈인데 얘를 unsqueeze 두번
+        # qdot0 는 (1,1,A)
+        # Expand (N, 1, A)
         qdot0 = qdot.unsqueeze(0).unsqueeze(0).expand(self.n_sample, 1, self.n_action)  # (n_sample, 1, n_action)
         q0 = q.unsqueeze(0).unsqueeze(0).expand(self.n_sample, 1, self.n_action)        # (n_sample, 1, n_action)
+        
+        # Sample * dt = dv
         v = torch.cumsum(samples * dt, dim=1) + qdot0  # (n_sample, n_horizon, n_action)
         v_prev = torch.cat([qdot0, v[:, :-1, :]], dim=1)  # (n_sample, n_horizon, n_action)
         dq = v_prev * dt + 0.5 * samples * dt**2
+        # OR / v_prev 가 가속도를 통해 나온건데 굳이 더해줘야하나?
+        # dq = v_prev * dt
+
         q = torch.cumsum(dq, dim=1) + q0
 
         return q

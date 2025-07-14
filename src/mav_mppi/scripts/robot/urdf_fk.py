@@ -36,15 +36,18 @@ class URDFFK:
 
     def compute_fk_cpu(self, state : torch.Tensor) -> np.ndarray:
 
-        q_arm = state[3:].clone()
+        if state.shape[0] == 7:
+            q_arm = state.clone()  
+        else:
+            q_arm = state[3:].clone()
+
         base_pose = state[:3].clone()
         
         base_se3 = torch.eye((4))
         base_se3[:3,3] = base_pose.clone()
 
-        robot_tf = self.robot.forward_kinematics_cpu(q_arm, base_movement=False)  # 로봇 base → EEF
+        robot_tf = self.robot.forward_kinematics_cpu(q_arm, base_movement=False)  # robot base → EEF
 
-        
         T_world_to_ee = base_se3 @ robot_tf
         return T_world_to_ee.numpy()
 
@@ -52,35 +55,21 @@ class URDFFK:
 
     def compute_fk_gpu(self,
         q_arm: torch.Tensor,           # (N, T, 7)
-        # drone_samples: torch.Tensor, # (N, T, 3)
-        base_xyzquat: torch.Tensor,      # (7,)
+        base_xyzquat: torch.Tensor,    # (7,) → 사실상 (3,)만 사용
         base_movement: bool = False
     ) -> torch.Tensor:
-        """
-        병렬 GPU FK 계산: 드론 pose와 관절 궤적을 기반으로 EE 위치 계산
 
-        Args:
-            q_arm (torch.Tensor): (N, T, 7) - 로봇 관절 trajectory
-            base_xyzquat (np.ndarray): (7,) - 드론 pose (xyz + quat)
-            base_movement (bool): 현재 사용하지 않음
-
-        Returns:
-            torch.Tensor: (N, T, 4, 4) - EE pose in world frame
-        """
-        device = q_arm.device
+        # device = q_arm.device
         N, T, _ = q_arm.shape
 
-        # 1. 드론 base pose → torch 변환행렬 (4,4)
-        base_tf = self.xyzquat_to_matrix(base_xyzquat).to(device)  # (4, 4)
+        base_xyz = base_xyzquat[:3].unsqueeze(0).unsqueeze(0)  # (1, 1, 3)
+        base_xyz = base_xyz.expand(N, T, 3)                    # (N, T, 3)
 
-        # 2. (N, T, 4, 4)로 확장
-        base_tf = base_tf.unsqueeze(0).unsqueeze(0).expand(N, T, 4, 4)
+        base_tf = xyz_to_se3(base_xyz)                         # (N, T, 4, 4)
 
-        # 3. manipulator FK (GPU 병렬)
         robot_tf = self.robot.forward_kinematics(q_arm, base_movement=base_movement)  # (N, T, 4, 4)
 
-        # 4. 최종 world → EE 변환
-        return base_tf @ robot_tf
+        return torch.matmul(base_tf, robot_tf)    
     
     def compute_fk_whole_gpu(self,
         qSample: torch.Tensor,          # (N, T, 10)
@@ -92,9 +81,6 @@ class URDFFK:
 
         se3_base = xyz_to_se3(q_base)
         base_to_arm = self.robot.forward_kinematics(q_arm, base_movement=base_movement) # (N, T, 4, 4)
-
-        print(f"se3_base : {se3_base.shape}")
-        print(f"base_to_arm : {base_to_arm.shape}")
 
         # # 3. 최종 world → EE 변환
         return torch.matmul(se3_base, base_to_arm)

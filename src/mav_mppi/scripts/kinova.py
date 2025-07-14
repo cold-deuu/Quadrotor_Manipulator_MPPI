@@ -20,7 +20,8 @@ from copy import deepcopy
 from cvxopt import matrix, solvers
 
 from robot.urdf_fk import URDFFK
-from mppi_solver.whole_mppi2 import whole_MPPI 
+# from mppi_solver.whole_mppi2 import whole_MPPI 
+from mppi_solver.mppi import MPPI
 import torch
 
 
@@ -77,7 +78,7 @@ class controller:
         self.v     = None
         self.baseSE3 = pin.SE3(1)
 
-        self.mppi = whole_MPPI()
+        self.mppi = MPPI()
 
         rospack = rospkg.RosPack()
         urdf_path = rospack.get_path("aerial_manipulation") + "/urdf/aerial_manipulator_gpu.urdf"
@@ -90,8 +91,6 @@ class controller:
         self.rate             = rospy.Rate(100)
         self.iter             = 0
         self.qtmp             = np.zeros((4,))
-
-
 
 
     def joint_state_callback(self, msg):
@@ -110,13 +109,11 @@ class controller:
         # pin.updateFramePlacements(self.robot.model, self.robot.data)
 
 
-        self.mppi.update_state(self.q_euler, self.v)
+        self.mppi.update_joint(self.q, self.v)
 
 
     def main(self):
-        mppi_stime = 0
-        q_des = None
-        v_des = None
+
         while not rospy.is_shutdown():
             self.rate.sleep()
             if self.q is None or self.v is None: 
@@ -165,30 +162,18 @@ class controller:
  
             else:
                 if not self.control_init:
-                    mppi_stime = time()
                     self.control_init = True
                 q_des, v_des = self.mppi.compute_control_input()  
-
-                # if (time()-mppi_stime<30.0):
-                #     rospy.loginfo("Here")
-
-                # else:
-                #     print(f"drone xyz : {self.q[:3]}")
-                #     rospy.logwarn("End")
-                
-
                     
-                torque = self.robot.data.M[6:,6:] @ (400 * (q_des[3:] - self.q[7:]) + 40 * ( - self.v[6:])) + g[6:]
-                
-                print(f'oMi : {oMi}')
+                torque = self.robot.data.M[6:,6:] @ (400 * (q_des - self.q[7:]) + 40 * (- self.v[6:])) + g[6:]
             
                 msg_arm = JointState()
                 msg_arm.effort = [float(t) for t in torque[:7]]
                 self.publisher.publish(msg_arm)
 
-                msg_drone = Float64MultiArray()
-                msg_drone.data = q_des[:3].tolist()
-                self.dronePosePublisher.publish(msg_drone)
+                # msg_drone = Float64MultiArray()
+                # msg_drone.data = q_des[:3].tolist()
+                # self.dronePosePublisher.publish(msg_drone)
 
 
 if __name__ == "__main__":

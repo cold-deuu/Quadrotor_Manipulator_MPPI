@@ -24,7 +24,7 @@ add_custom_target(_rotors_comm_generate_messages_check_deps_${_filename}
 
 get_filename_component(_filename "/home/chan/aerial_ws/src/rotors_simulator/rotors_comm/srv/Octomap.srv" NAME_WE)
 add_custom_target(_rotors_comm_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "rotors_comm" "/home/chan/aerial_ws/src/rotors_simulator/rotors_comm/srv/Octomap.srv" "geometry_msgs/Point:std_msgs/Header:octomap_msgs/Octomap"
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "rotors_comm" "/home/chan/aerial_ws/src/rotors_simulator/rotors_comm/srv/Octomap.srv" "std_msgs/Header:geometry_msgs/Point:octomap_msgs/Octomap"
 )
 
 get_filename_component(_filename "/home/chan/aerial_ws/src/rotors_simulator/rotors_comm/srv/RecordRosbag.srv" NAME_WE)
@@ -49,7 +49,7 @@ _generate_msg_cpp(rotors_comm
 _generate_srv_cpp(rotors_comm
   "/home/chan/aerial_ws/src/rotors_simulator/rotors_comm/srv/Octomap.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/octomap_msgs/cmake/../msg/Octomap.msg"
+  "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/octomap_msgs/cmake/../msg/Octomap.msg"
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/rotors_comm
 )
 _generate_srv_cpp(rotors_comm
@@ -98,7 +98,7 @@ _generate_msg_eus(rotors_comm
 _generate_srv_eus(rotors_comm
   "/home/chan/aerial_ws/src/rotors_simulator/rotors_comm/srv/Octomap.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/octomap_msgs/cmake/../msg/Octomap.msg"
+  "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/octomap_msgs/cmake/../msg/Octomap.msg"
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/rotors_comm
 )
 _generate_srv_eus(rotors_comm
@@ -147,7 +147,7 @@ _generate_msg_lisp(rotors_comm
 _generate_srv_lisp(rotors_comm
   "/home/chan/aerial_ws/src/rotors_simulator/rotors_comm/srv/Octomap.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/octomap_msgs/cmake/../msg/Octomap.msg"
+  "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/octomap_msgs/cmake/../msg/Octomap.msg"
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/rotors_comm
 )
 _generate_srv_lisp(rotors_comm
@@ -196,7 +196,7 @@ _generate_msg_nodejs(rotors_comm
 _generate_srv_nodejs(rotors_comm
   "/home/chan/aerial_ws/src/rotors_simulator/rotors_comm/srv/Octomap.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/octomap_msgs/cmake/../msg/Octomap.msg"
+  "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/octomap_msgs/cmake/../msg/Octomap.msg"
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/rotors_comm
 )
 _generate_srv_nodejs(rotors_comm
@@ -245,7 +245,7 @@ _generate_msg_py(rotors_comm
 _generate_srv_py(rotors_comm
   "/home/chan/aerial_ws/src/rotors_simulator/rotors_comm/srv/Octomap.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/octomap_msgs/cmake/../msg/Octomap.msg"
+  "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/octomap_msgs/cmake/../msg/Octomap.msg"
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/rotors_comm
 )
 _generate_srv_py(rotors_comm

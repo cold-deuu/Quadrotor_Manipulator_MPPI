@@ -72,9 +72,9 @@ devel/include/mav_msgs/Actuators.h: /opt/ros/noetic/share/gencpp/msg.h.template
 
 devel/include/mav_msgs/AttitudeThrust.h: /opt/ros/noetic/lib/gencpp/gen_cpp.py
 devel/include/mav_msgs/AttitudeThrust.h: ../mav_comm/mav_msgs/msg/AttitudeThrust.msg
+devel/include/mav_msgs/AttitudeThrust.h: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
 devel/include/mav_msgs/AttitudeThrust.h: /opt/ros/noetic/share/geometry_msgs/msg/Vector3.msg
 devel/include/mav_msgs/AttitudeThrust.h: /opt/ros/noetic/share/std_msgs/msg/Header.msg
-devel/include/mav_msgs/AttitudeThrust.h: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
 devel/include/mav_msgs/AttitudeThrust.h: /opt/ros/noetic/share/gencpp/msg.h.template
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chan/aerial_ws/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating C++ code from mav_msgs/AttitudeThrust.msg"
 	cd /home/chan/aerial_ws/src/mav_comm/mav_msgs && /home/chan/aerial_ws/src/build/catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/gencpp/cmake/../../../lib/gencpp/gen_cpp.py /home/chan/aerial_ws/src/mav_comm/mav_msgs/msg/AttitudeThrust.msg -Imav_msgs:/home/chan/aerial_ws/src/mav_comm/mav_msgs/msg -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg -Inav_msgs:/opt/ros/noetic/share/nav_msgs/cmake/../msg -Iactionlib_msgs:/opt/ros/noetic/share/actionlib_msgs/cmake/../msg -p mav_msgs -o /home/chan/aerial_ws/src/build/devel/include/mav_msgs -e /opt/ros/noetic/share/gencpp/cmake/..

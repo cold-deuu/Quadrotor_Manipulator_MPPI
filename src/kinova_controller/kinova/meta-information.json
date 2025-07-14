@@ -1,0 +1,16 @@
+{
+    "robots": [
+        {
+            "name": "unknown",
+            "type": "unknown",
+            "manufacturer": "unknown",
+            "xacro-generated": false,
+            "urdf": [
+                "kinova.urdf"
+            ],
+            "variant": null,
+            "source-link": "https://github.com/ankurhanda/robot-assets/tree/12f1a3c89c9975194551afaed0dfae1e09fdb27c/urdfs/robots/kinova",
+            "id": 89
+        }
+    ]
+}
