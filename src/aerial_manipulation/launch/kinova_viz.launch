@@ -3,7 +3,7 @@
     <param name="robot_description" command="$(find xacro)/xacro $(find aerial_manipulation)/urdf/kinova_urdf/kinova.urdf.xacro" />
 
     <!-- Joint State Publisher GUI 실행 -->
-    <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
+    <!--<node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />-->
 
     <!-- Robot State Publisher 실행 -->
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />

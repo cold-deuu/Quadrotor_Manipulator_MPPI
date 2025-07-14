@@ -70,8 +70,8 @@ class MPPI:
         # Target states
         if target_pose is None:
             self.target_pose = Pose()
-            self.target_pose.pose = torch.tensor([0.416, 0, 0.57])
-            self.target_pose.orientation = torch.tensor([0,0,0,1])
+            self.target_pose.pose = torch.tensor([0.30939, 0.0960938,  0.501106])
+            self.target_pose.orientation = torch.tensor([ -0.7068252 , 0, 0, 0.7073883])
         else:
             self.target_pose = target_pose
         # self.target_pose.orientation = torch.tensor([0, -0.4871745, 0, -0.8733046])
@@ -98,6 +98,11 @@ class MPPI:
 
         # Log
         self.cnt = 0
+
+        self.trajectory = torch.zeros((self.n_samples, self.n_horizon, 4, 4), device=self.device)
+        self.best_idx = 0
+        self.vdes = torch.zeros((self.n_action), device=self.device)
+        self.qdes = torch.zeros((self.n_action), device=self.device)
 
     def check_reach(self, q_full):
 
@@ -126,9 +131,18 @@ class MPPI:
             return False
 
     def compute_control_input(self):
+        
+        # 종료 조건 : 목표에 도달하면
+        if self.check_reach(self.qdes):
+            print("Reach !")
+            qdes_np = self.qdes.to('cpu').numpy()
+            vdes_np = self.vdes.to('cpu').numpy()
+            return qdes_np, vdes_np, self.trajectory, self.best_idx
+        
 
         # 초기 설정
         u = self.u_prev.clone() # 이전 가속도
+        # u = torch.zeros((self.n_horizon, self.n_action), device=self.device)
         self._qddot = u[0].clone() # 현재의 가속도
 
         # 샘플링
@@ -137,14 +151,14 @@ class MPPI:
         q_samples = self.sample_gen.get_sample_joint(v, self._q, self._qdot, self.dt)
         
         # Forward Kinematics - 샘플들에 대해 병렬 연산
-        trajectory = self.fk_urdf.compute_fk_gpu(q_samples, self.base_pose)
+        self.trajectory = self.fk_urdf.compute_fk_gpu(q_samples, self.base_pose)
 
         # cost 계산
         none_joint_trajs = torch.zeros((self.n_samples, self.n_horizon, self.n_action), device=self.device)
-        self.cost_manager.update_pose_cost(q_samples, v, trajectory, none_joint_trajs, self.target_pose)
+        self.cost_manager.update_pose_cost(q_samples, v, self.trajectory, none_joint_trajs, self.target_pose)
         self.cost_manager.update_covar_cost(u, v, self.sample_gen.sigma_matrix)
         S, _ = self.cost_manager.compute_all_cost() # 최종 cost : 샘플 별로 cost 점수 하나 씩
-
+        self.best_idx = torch.argmin(S)
         # weight 계산 + 부드럽게 필터링
         w = self.compute_weights(S, self._lambda) # (n_samples,)
         w_expanded = w.view(-1, 1,1) # (n_samples, 1, 1) : 아래 noise(n_samples, n_horizon, n_action)와 연산하기 위해서
@@ -162,17 +176,16 @@ class MPPI:
         # 가속도 적분해서 목표 속도와 경로 계산
         self.vdes = self._qdot + self.u * self.dt
         self.qdes = self._q + self._qddot * self.dt + 0.5 * self.u * self.dt * self.dt
+        
 
+        
         # NUMPY
         qdes_np = self.qdes.to('cpu').numpy()
         vdes_np = self.vdes.to('cpu').numpy()
 
-        # 종료 조건 : 목표에 도달하면
-        if self.check_reach(self.qdes):
-            print("Reach !")
-            return qdes_np, vdes_np
+
         
-        return qdes_np, vdes_np
+        return qdes_np, vdes_np, self.trajectory, self.best_idx
     
 
     

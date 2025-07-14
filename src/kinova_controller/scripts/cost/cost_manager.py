@@ -79,9 +79,9 @@ class CostManager:
         S = torch.zeros((self.n_sample), device=self.device)
         cost_stage = self.pose_cost.compute_stage_cost(self.eef_trajectories, self.target)
         cost_terminal = self.pose_cost.compute_terminal_cost(self.eef_trajectories, self.target)
-        # cost_centering = self.joint_cost.compute_centering_cost(self.qSamples[...,3:])
+        # cost_centering = self.joint_cost.compute_centering_cost(self.qSamples)
         # cost_drone_pose = self.pose_cost.compute_drone_pose_cost(self.qSamples, self.eef_trajectories)
-        # cost_joint_limit = self.joint_cost.compute_joint_limit_cost(self.qSamples[..., 3:])
+        # cost_joint_limit = self.joint_cost.compute_joint_limit_cost(self.qSamples)
 
         # print(f"Stage Cost : {cost_stage}")
         # print(f"Terminal Cost : {cost_terminal}")

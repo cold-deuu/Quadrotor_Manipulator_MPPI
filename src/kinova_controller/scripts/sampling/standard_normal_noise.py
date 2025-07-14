@@ -17,7 +17,7 @@ class StandardSamplling:
 
         # Standard Dev.
         self.sigma = torch.eye((self.n_action), device = self.device) # 표준편차 0.1
-        self.sigma *= 0.3
+        self.sigma *= 0.03
         # self.sigma[:3, :3] *= 3.0
         # self.sigma[3:, 3:] *= 3.0
 

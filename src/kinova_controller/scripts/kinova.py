@@ -23,6 +23,8 @@ from robot.urdf_fk import URDFFK
 from mppi_solver.mppi import MPPI
 import torch
 
+from visualization_msgs.msg import Marker, MarkerArray
+from geometry_msgs.msg import Point
 
 def pretty_matrix_print(matrix):
     """
@@ -63,6 +65,8 @@ class controller:
     def __init__(self):
         rospy.init_node("kinova_controller", anonymous=True)
         rospy.Subscriber("/joint_states", JointState, self.joint_state_callback)
+        self.marker_pub = rospy.Publisher("mppi_trajectories", MarkerArray, queue_size=10)
+
         self.publisher = rospy.Publisher("/kinova_effort_controller/command", Float64MultiArray, queue_size=10)
 
         self.robot = kinova()
@@ -87,6 +91,56 @@ class controller:
 
         pin.computeAllTerms(self.robot.model, self.robot.data, self.q, self.v)
         self.mppi.update_joint(self.q, self.v)
+
+
+    def publish_trajectories(self, sampled_trajs, best_traj):
+        N, T, D = sampled_trajs.shape  # ex: (100, 30, 3)
+
+        marker_array = MarkerArray()
+
+        for i in range(N):
+            marker = Marker()
+            marker.header.frame_id = "j2s7s300_link_base"
+            marker.header.stamp = rospy.Time.now()
+            marker.ns = "mppi_samples"
+            marker.id = i
+            marker.type = Marker.LINE_STRIP
+            marker.action = Marker.ADD
+            marker.scale.x = 0.0005  # Line width
+            marker.color.r = 1.0
+            marker.color.g = 0.0
+            marker.color.b = 0.0
+            marker.color.a = 0.3  # Alpha (투명도)
+
+            for t in range(T):
+                p = Point()
+                p.x, p.y, p.z = sampled_trajs[i, t]
+                marker.points.append(p)
+
+            marker_array.markers.append(marker)
+
+        best_marker = Marker()
+        best_marker.header.frame_id = "j2s7s300_link_base"
+        best_marker.header.stamp = rospy.Time.now()
+        best_marker.ns = "mppi_best"
+        best_marker.id = N  # 기존 샘플 marker들과 ID 겹치지 않게
+        best_marker.type = Marker.LINE_STRIP
+        best_marker.action = Marker.ADD
+        best_marker.scale.x = 0.001  # 더 굵게
+        best_marker.color.r = 0.0
+        best_marker.color.g = 0.2
+        best_marker.color.b = 1.0
+        best_marker.color.a = 0.9
+
+        for t in range(best_traj.shape[0]):
+            p = Point()
+            p.x, p.y, p.z = best_traj[t]
+            best_marker.points.append(p)
+
+        marker_array.markers.append(best_marker)
+
+        return marker_array
+
 
 
     def main(self):
@@ -136,16 +190,22 @@ class controller:
                 self.publisher.publish(msg)
  
             else:
+                qtarget = np.array([0, 3.14, 0,4.7,0,1.57, -6.28]) 
                 if not self.control_init:
                     self.control_init = True
-                q_des, v_des = self.mppi.compute_control_input()  
+                q_des, v_des, trajectory, best_idx = self.mppi.compute_control_input()  
                     
                 torque = self.robot.data.M @ (400 * (q_des - self.q) + 40 * (- self.v)) + g
-                
+                trajectory_xyz = trajectory[:50,:,:3,3].to('cpu').numpy()
+                trajectory_best = trajectory[best_idx,:,:3, 3].to('cpu').numpy()
+
+                marker = self.publish_trajectories(trajectory_xyz, trajectory_best)
                 print(f"oMi : {oMi}")
                 msg = Float64MultiArray()
                 msg.data = torque.tolist()
                 self.publisher.publish(msg)
+
+                self.marker_pub.publish(marker)
 
                 # msg_drone = Float64MultiArray()
                 # msg_drone.data = q_des[:3].tolist()

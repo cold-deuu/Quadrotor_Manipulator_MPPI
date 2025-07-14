@@ -9,7 +9,7 @@
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen" />
 
   <!-- 4. Rviz (선택사항) -->
-  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find franka_panda_description)/config/your_config.rviz" /> -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find aerial_manipulation)/urdf/kinova_urdf/kinova.rviz" />
 
   <!-- 5. Gazebo에 로봇 스폰 -->
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
